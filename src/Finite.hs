@@ -5,7 +5,7 @@ module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, roundToPrecis
 
 ----------------------------------------------------------------
 
-import Finite.Internal
+import Extensions
 
 import Data.Ratio
 

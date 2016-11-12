@@ -26,21 +26,19 @@ data Number
 -- | Compound Unit for a number
 --   Consists of all dimensional components
 --   * Dimension
---   * Extension (Dimension Multiplier: g = 1, kg = 1000, mg = 1/1000, ng = 1/1000000000, etc)
 --   * Exponent (m^2?, m^3?, etc.)
-type Unit = [(Dimension, Integer, Integer)]
+type Unit = [(Dimension, Integer)]
 
 -- | The SI Units, to be paired with numbers for aid in computation
 data Dimension
     = Meter -- ^ Length
-    | Gram -- ^ Mass
+    | KiloGram -- ^ Mass
     | Second -- ^ Time
     | Ampere -- ^ Electric Current
     | Kelvin -- ^ Temperature
     | Mole -- ^ Amount of Substance
     | Candela -- ^ Luminous Intensity
-    | Unitless -- ^ No Dimension
-    deriving Eq
+    deriving (Eq, Show)
 
 ----------------------------------------------------------------
 -- EXPRESSION
