@@ -1,7 +1,7 @@
 -- | The Finite Module which exports Finite
 ----------------------------------------------------------------
 
-module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, roundToPrecision) where
+module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, roundToPrecision, fromIntegerWithPrecision, fromIntegerMatchingPrecision) where
 
 ----------------------------------------------------------------
 
@@ -79,6 +79,18 @@ instance Num Finite where
     signum (Finite a _) = Finite (signum a) 0
     
     fromInteger a = (a*10^16)*^-16 -- ^ Assumes IEEE Double precision
+
+-- | takes an integer and sets it to a certain sigfigs precision
+--   (instead of the default IEEE Double precision)
+fromIntegerWithPrecision :: Integer -> Integer -> Finite
+fromIntegerWithPrecision a p
+    | digits a > p = (a `div` 10^(digits a - p))*^(digits a - p) -- cut off end of int and give it that exponent
+    | otherwise = (a*10^(p - digits a))*^-(p - digits a) -- append zeroes to end and give it that exponent
+
+-- | takes an integer and another finite and turns the integer into
+--   a finite of the same precision (sigfigs)
+fromIntegerMatchingPrecision :: Integer -> Finite -> Finite
+fromIntegerMatchingPrecision a n = fromIntegerWithPrecision a (sigfigs n)
 
 ----------------------------------------------------------------
 -- EQUATABILITY & ORDERABILITY

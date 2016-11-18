@@ -9,7 +9,6 @@ module Main where
 import Test.HUnit
 
 import Finite
-import Finite.Internal
 
 import Data.Ratio
 

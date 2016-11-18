@@ -15,8 +15,8 @@ import Finite
 data Number
     = Real Finite -- ^ "normal" inputted numbers and everything measured
     | Absolute Integer -- ^ numbers as used in math for finding simplest forms
-    | Unknown String -- ^ the representation of variables
     | Infinity Bool -- ^ Infinity, whrere true is +∞ and false is -∞
+    | Unknown String -- ^ the representation of variables
     | Undefined -- ^ the value when a computation cannot give a useful solution
 
 ----------------------------------------------------------------
@@ -46,9 +46,14 @@ data Dimension
 
 -- | The Nodes of the Abstract Syntax Tree
 data Expression
-    = Operator String Evaluator [Expression] -- ^ The middle nodes, which tell it how to collapse and what's underneath
+    = Operator Evaluator [Expression] -- ^ The middle nodes, which tell it how to collapse and what's underneath
     | Value Number Unit -- ^ The Bottom Node
 
--- FIXME: should it be a monad, it must be faillable
-type Evaluator = [Expression] -> Expression -- ^ takes the sub expressions and returns an expression that can be evaluated up the tree
-    -- does not need to evaluate to Value however, if it cannot evaluate, it will simplify as far as possible
+-- | The Description and Functionality corresponding to an Operator
+--   functions as the Faillable Evaluator for the tree
+--   it will either return a Value of the evaluated Expression
+--   or the same expression back (indicating it couldn't be evaluated)
+type Evaluator = (Identifier, [Expression] -> Expression)
+
+-- | Identifier of an operator
+type Identifier = String
