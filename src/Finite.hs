@@ -1,7 +1,7 @@
 -- | The Finite Module which exports Finite
 ----------------------------------------------------------------
 
-module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, roundToPrecision, fromIntegerWithPrecision, fromIntegerMatchingPrecision) where
+module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, showNatural, showFull, showScientific, roundToPrecision, fromIntegerWithPrecision, fromIntegerMatchingPrecision) where
 
 ----------------------------------------------------------------
 
@@ -41,7 +41,6 @@ sigfigs (Finite a _) = digits a
 -- | Order of Magnitude
 --   `n.nnnn*10^?`
 orderOfMagnitude :: Finite -> Integer
---orderOfMagnitude 0 = 0
 orderOfMagnitude (Finite a m) = digits a - 1 + m
 
 ----------------------------------------------------------------
@@ -49,10 +48,29 @@ orderOfMagnitude (Finite a m) = digits a - 1 + m
 ----------------------------------------------------------------
 
 instance Show Finite where
-    show (Finite a m) = "[" ++ (show a) ++ "*10^" ++ (show m) ++ "]"
+    show = showNatural
 
--- showFull :: Finite -> String
--- showFull (Finite a m) =
+-- | Show with component decomposition
+showNatural :: Finite -> String
+showNatural (Finite a m) = "[" ++ (show a) ++ "*10^" ++ (show m) ++ "]"
+
+-- | Show in full written form
+showFull :: Finite -> String
+showFull (Finite a m)
+    | m < 0 = show intPart ++ "." ++ leadingZeroes ++ show floatPart -- has decimals
+    | otherwise = show (a*10^m) -- no decimals
+  where
+    intPart = a `div` 10^(abs m)
+    floatPart = a - a `div` 10^(abs m) * 10^(abs m) -- not including leading 0's
+    leadingZeroes = replicate (fromIntegral $ abs m - digits floatPart) '0'
+
+-- | Show in Scientific form
+showScientific :: Finite -> String
+showScientific (Finite a m) = lead ++ decimals ++ "e" ++ show exponent
+  where
+    lead = [head (show a)]
+    decimals = if tail (show a) /= "" then "." ++ tail (show a) else ""
+    exponent = digits a + m - 1
 
 ----------------------------------------------------------------
 -- NUMBERNESS
@@ -114,6 +132,7 @@ instance Fractional Finite where -- FIXME not working with exponents > 0
         lowestPrecision = min (sigfigs am) (sigfigs bn)
 
     fromRational r = (fromInteger (numerator r)) / (fromInteger (denominator r)) -- ^ Assumes IEEE Double precision
+    -- FIXME: fromRational can have error of negative exponent, try: ((1.23121412e-5) :: Finite)
 
 -- | The representation as a ratio
 --   `a/10^-m`

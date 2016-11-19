@@ -17,6 +17,7 @@ import Data.List
 -- | Find the number of Digits in a Decimal Number
 --   this is useful
 digits :: Integer -> Integer
+digits 0 = 1 -- helps with power and string manipulation stuff
 digits a = until (\n -> abs a `div` 10 ^ n == 0) (+ 1) 0
 
 ----------------------------------------------------------------
