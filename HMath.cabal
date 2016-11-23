@@ -49,7 +49,8 @@ library
   -- Modules exported by the library.
   exposed-modules:   Finite,
                      Structure,
-                     Algebra
+                     Algebra,
+                     Parsing.AsciiMath
   
   -- Modules included in this library but not exported.
   other-modules:     Extensions
@@ -58,7 +59,8 @@ library
   -- other-extensions:
   
   -- Other library packages from which modules are imported.
-  build-depends:     base >=4.9 && <4.10
+  build-depends:     base >=4.9 && <4.10,
+                     parsec
   
   -- Directories containing source files.
   hs-source-dirs:    src
