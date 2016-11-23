@@ -13,7 +13,7 @@ import Finite
 
 -- | The type that references all number-like values
 data Number
-    = Real Finite -- ^ "normal" inputted numbers and everything measured
+    = Measure Finite -- ^ "normal" inputted numbers and everything measured
     | Absolute Integer -- ^ numbers as used in math for finding simplest forms
     | Infinity Bool -- ^ Infinity, whrere true is +∞ and false is -∞
     | Unknown String -- ^ the representation of variables

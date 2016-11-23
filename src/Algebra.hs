@@ -44,9 +44,9 @@ multiplyE es = Operator multiplication es
 
 -- | Addition of Number types
 addN :: Number -> Number -> Maybe Number
-addN (Real a) (Real b) = Just $ Real $ a + b
-addN (Real a) (Absolute b) = Just $ Real $ a + fromIntegerMatchingPrecision b a
-addN (Absolute a) (Real b) = addN (Real b) (Absolute a) -- commutative property
+addN (Measure a) (Measure b) = Just $ Measure $ a + b
+addN (Measure a) (Absolute b) = Just $ Measure $ a + fromIntegerMatchingPrecision b a
+addN (Absolute a) (Measure b) = addN (Measure b) (Absolute a) -- commutative property
 addN (Unknown _) _ = Nothing
 addN a (Unknown b) = addN (Unknown b) a -- commutative property
 addN (Infinity a) (Infinity b) = Just $ if a == b then Infinity a else Undefined
@@ -57,9 +57,9 @@ addN a (Undefined) = addN (Undefined) a -- commutative property
 
 -- | Multiplication of Number types
 multiplyN :: Number -> Number -> Maybe Number
-multiplyN (Real a) (Real b) = Just $ Real $ a * b
-multiplyN (Real a) (Absolute b) = Just $ Real $ a + fromIntegerMatchingPrecision b a
-multiplyN (Absolute a) (Real b) = multiplyN (Real b) (Absolute a) -- commutative property
+multiplyN (Measure a) (Measure b) = Just $ Measure $ a * b
+multiplyN (Measure a) (Absolute b) = Just $ Measure $ a + fromIntegerMatchingPrecision b a
+multiplyN (Absolute a) (Measure b) = multiplyN (Measure b) (Absolute a) -- commutative property
 multiplyN (Unknown _) _ = Nothing
 multiplyN a (Unknown b) = multiplyN (Unknown b) a
 multiplyN (Infinity a) (Infinity b) = Just $ if a == b then Infinity a else Undefined
