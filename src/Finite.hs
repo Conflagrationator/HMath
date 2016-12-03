@@ -19,7 +19,6 @@ data Finite = Finite
     {base :: Integer, -- ^ the `b` in `b*10^e`
      expo :: Integer} -- ^ the `e` in `b*10^e`
 
---------------------------------
 -- CONVENIENCE CONSTRUCTORS
 
 -- | Constructor for Finite Data Type
@@ -31,7 +30,6 @@ a*^m = Finite a m
 (*^-) :: Integer -> Integer -> Finite
 a*^-m = a*^(-m)
 
---------------------------------
 -- INFORMATION
 
 -- | Significant figures
@@ -132,7 +130,6 @@ instance Fractional Finite where -- FIXME not working with exponents > 0
         lowestPrecision = min (sigfigs am) (sigfigs bn)
 
     fromRational r = (fromInteger (numerator r)) / (fromInteger (denominator r)) -- ^ Assumes IEEE Double precision
-    -- FIXME: fromRational can have error of negative exponent, try: ((1.23121412e-5) :: Finite)
 
 -- | The representation as a ratio
 --   `a/10^-m`
@@ -154,11 +151,13 @@ instance RealFrac Finite where
 
 -- | Powers
 
-
+-- power :: Finite -> Finite -> Finite
+-- power (Finite a m) (Finite b n) =
 
 -- | Roots
 
-
+-- root :: Finite -> Finite -> Finite
+-- root (Finite a m) (Finite b n) =
 
 ----------------------------------------------------------------
 -- OTHER FUNCTIONS
@@ -168,8 +167,18 @@ instance RealFrac Finite where
 --   supply with a number and the number of significant figures you want to round to
 roundToPrecision :: Finite -> Integer -> Finite
 roundToPrecision am@(Finite a m) p
-    | d == p = am
+    | d <= p = am -- if equal or worse precision than specified, return original
     | otherwise = (a `div` 10^(d-p) + r) *^ (d-p+m) -- d-p is how many digits to take off the end of a
   where
       d = digits a
       r = if a `div` 10^(d-p-1) `mod` 10 >= 5 then 1 else 0 -- add 1 to the number if the digit after the precision is >= 5
+
+      
+----------------------------------------------------------------
+-- MATHEMATICAL CONSTANTS
+----------------------------------------------------------------
+
+-- piAtPrecision :: Integer -> Finite
+
+
+-- eAtPrecision :: Integer -> Finite

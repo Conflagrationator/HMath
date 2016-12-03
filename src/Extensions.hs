@@ -39,3 +39,13 @@ foldUnique :: Eq a => (a -> a -> Maybe a) -> [a] -> [a] -> [a]
 foldUnique f as bs = map foldr' $ groupAssoc (\a b -> isJust (f a b)) $ as ++ bs
   where
     foldr' ns = foldr (\a b -> fromJust (f a b)) (head ns) (tail ns) -- modified foldr which has its seed as the head
+
+----------------------------------------------------------------
+-- RELATIONSHIPS
+----------------------------------------------------------------
+
+-- | Until relationship holds
+--   apply the "new" function supplied until a certain relationship between
+--   the previous and next iterations is established. Return the newest of those.
+untilR :: ((a, a) -> Bool) -> (a -> a) -> a -> a
+untilR relationship new seed = snd $ until relationship (\(o, n) -> (n, new n)) (seed, new seed)
