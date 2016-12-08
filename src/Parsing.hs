@@ -1,7 +1,7 @@
 -- AsciiMath Parsing Functionality
 ----------------------------------------------------------------
 
-module Parsing.AsciiMath where
+module AsciiMath.Parsing where
 
 ----------------------------------------------------------------
 

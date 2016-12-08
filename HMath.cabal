@@ -10,7 +10,7 @@ name:                HMath
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.0.0
+version:             0.2.0.0
 
 -- A short (one-line) description of the package.
 synopsis:            A Library for Working With Mathematics in Haskell.
@@ -49,14 +49,19 @@ library
   -- Modules exported by the library.
   exposed-modules:   Finite,
                      Structure,
-                     Algebra,
-                     Parsing.AsciiMath
+                     -- Default Structure Additions
+                     Structure.Vector
+                     -- Algebra System
+                     --Algebra,
+                     -- Parsing
+                     --Parsing -- parses AsciiMath
   
   -- Modules included in this library but not exported.
   other-modules:     Extensions
   
   -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:
+  other-extensions:  ExistentialQuantification,
+                     DeriveDataTypeable
   
   -- Other library packages from which modules are imported.
   build-depends:     base >=4.9 && <4.10,
