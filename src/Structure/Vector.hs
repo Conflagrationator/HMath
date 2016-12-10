@@ -8,13 +8,13 @@ module Structure.Vector where
 ----------------------------------------------------------------
 
 import Structure
+import Structure.Addable
 
 ----------------------------------------------------------------
--- SRUCTURE DEFINITION
+-- CLASS
 ----------------------------------------------------------------
 
-class (Structure s) => Vector s where
-    add :: s -> s -> s
+class (Addable s) => Vector s where
     smult :: Number -> s -> s
     zero :: s
 
@@ -24,11 +24,13 @@ class (Structure s) => Vector s where
 
 -- NUMBERS
 
-instance Vector Number where
+instance Addable Number where
     add (Absolute a) (Absolute b) = Absolute (a + b)
     add (Absolute a) (Measure b) = Measure (fromIntegral a + b)
     add (Measure a) (Absolute b) = add (Absolute b) (Measure a)
     add _ _ = unable
+
+instance Vector Number where
     smult (Absolute a) (Absolute b) = Absolute (a*b)
     smult (Absolute a) (Measure b) = Measure (fromIntegral a * b)
     smult (Measure a) (Absolute b) = add (Absolute b) (Measure a)

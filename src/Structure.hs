@@ -9,6 +9,7 @@ module Structure where
 ----------------------------------------------------------------
 
 import Finite
+import Extensions
 
 import Data.List
 import Data.Typeable
@@ -20,7 +21,7 @@ import Data.Maybe
 
 data Expression
     = forall s. Structure s => Value s Unit
-    -- | forall o. Operator o => Function o [Expression]
+    | Function Operator [Expression]
 
 instance Eq Expression where
     (Value a u) == (Value b v) = if typeOf a == typeOf b then a == fromJust (cast b) && u == v else False
@@ -35,6 +36,10 @@ instance Structure Expression where
 -- OPERATOR
 ----------------------------------------------------------------
 
+data Operator = Operator Displayer Evaluator
+
+type Displayer = [Expression] -> String
+type Evaluator = [Expression] -> Expression
 
 -- want things like:
 
@@ -133,3 +138,14 @@ instance Show Dimension where
     show Kelvin = "K"
     show Mole = "mol"
     show Candela = "Cd"
+
+----------------------------------------------------------------
+-- UNIT HANDLING
+----------------------------------------------------------------
+
+-- -- | Multiplication of Units
+-- multiplyUnits :: Unit -> Unit -> Unit
+-- multiplyUnits u v = foldUnique multiplyUnitComponents u v
+--   where
+--     multiplyUnitComponents :: (Dimension, Integer) -> (Dimension, Integer) -> Maybe (Dimension, Integer)
+--     multiplyUnitComponents (dim1, exp1) (dim2, exp2) = if dim1 == dim2 then Just (dim1, exp1 + exp2) else Nothing
