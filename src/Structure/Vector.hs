@@ -24,12 +24,6 @@ class (Addable s) => Vector s where
 
 -- NUMBERS
 
-instance Addable Number where
-    add (Absolute a) (Absolute b) = Absolute (a + b)
-    add (Absolute a) (Measure b) = Measure (fromIntegral a + b)
-    add (Measure a) (Absolute b) = add (Absolute b) (Measure a)
-    add _ _ = unable
-
 instance Vector Number where
     smult (Absolute a) (Absolute b) = Absolute (a*b)
     smult (Absolute a) (Measure b) = Measure (fromIntegral a * b)

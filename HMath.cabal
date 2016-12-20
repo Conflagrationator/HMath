@@ -48,10 +48,11 @@ cabal-version:       >=1.10
 library
   -- Modules exported by the library.
   exposed-modules:   Finite,
-                     Structure,
+                     Unit,
+                     Structure
                      -- Default Structure Additions
-                     Structure.Addable
-                     Structure.Vector
+                     --Structure.Addable
+                     --Structure.Vector
                      -- Algebra System
                      --Algebra,
                      -- Parsing
@@ -61,10 +62,7 @@ library
   other-modules:     Extensions
   
   -- LANGUAGE extensions used by modules in this package.
-  other-extensions:  ExistentialQuantification,
-                     DeriveDataTypeable,
-                     ScopedTypeVariables,
-                     RankNTypes
+  -- other-extensions:
   
   -- Other library packages from which modules are imported.
   build-depends:     base >=4.9 && <4.10,

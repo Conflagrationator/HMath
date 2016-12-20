@@ -35,9 +35,19 @@ addition = Operator showAddition evaluateAddition
     showAddition es = intercalate "+" (map show es)
     evaluateAddition [a] = a
     -- FIXME: a & b must be same type and Addable
-    --evaluateAddition es@((Value a u) : ((Value b v) : rest)) = if typeOf a == typeOf b then evaluateAddition ((Value (add a (fromJust (cast b))) (addUnits u v)) : rest) else returnAsWas es
+    evaluateAddition (es@((Value (a :: Addable n => n) u) : ((Value (b :: Addable n => n) v) : rest))) = if typeOf a == typeOf b then evaluateAddition ((Value (add a (fromJust (cast b))) (addUnits u v)) : rest) else returnAsWas es
     evaluateAddition es = returnAsWas es
     returnAsWas es = Function addition es
+
+----------------------------------------------------------------
+-- DEFAULT STRUCTURES
+----------------------------------------------------------------
+
+instance Addable Number where
+    add (Absolute a) (Absolute b) = Absolute (a + b)
+    add (Absolute a) (Measure b) = Measure (fromIntegral a + b)
+    add (Measure a) (Absolute b) = add (Absolute b) (Measure a)
+    add _ _ = unable
 
 ----------------------------------------------------------------
 -- UNITS
