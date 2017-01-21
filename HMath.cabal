@@ -48,10 +48,10 @@ cabal-version:       >=1.10
 library
   -- Modules exported by the library.
   exposed-modules:   Finite,
-                     Structure,
+                     Structure
                      -- Default Structure Additions
-                     Structure.Addable
-                     Structure.Vector
+                     --Structure.Addable
+                     --Structure.Vector
                      -- Algebra System
                      --Algebra,
                      -- Parsing
