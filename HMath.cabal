@@ -49,20 +49,20 @@ library
   -- Modules exported by the library.
   exposed-modules:   Finite,
                      Unit,
-                     Structure
+                     Structure,
                      -- Default Structure Additions
-                     --Structure.Addable
-                     --Structure.Vector
-                     -- Algebra System
-                     --Algebra,
-                     -- Parsing
-                     --Parsing -- parses AsciiMath
+                     Structure.Number,
+                     -- Default Constraint Additions
+                     Constraint.Addable
   
   -- Modules included in this library but not exported.
   other-modules:     Extensions
   
   -- LANGUAGE extensions used by modules in this package.
-  -- other-extensions:
+  other-extensions:  GADTs,
+                     FunctionalDependencies,
+                     FlexibleInstances,
+                     MultiParamTypeClasses
   
   -- Other library packages from which modules are imported.
   build-depends:     base >=4.9 && <4.10,
