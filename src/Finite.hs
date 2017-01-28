@@ -1,11 +1,11 @@
 -- | The Finite Module which exports Finite
 ----------------------------------------------------------------
 
-module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, roundToPrecision) where
+module Finite (Finite(..), (*^), (*^-), sigfigs, orderOfMagnitude, showNatural, showFull, showScientific, roundToPrecision, fromIntegerWithPrecision, fromIntegerMatchingPrecision) where
 
 ----------------------------------------------------------------
 
-import Finite.Internal
+import Extensions
 
 import Data.Ratio
 
@@ -19,7 +19,6 @@ data Finite = Finite
     {base :: Integer, -- ^ the `b` in `b*10^e`
      expo :: Integer} -- ^ the `e` in `b*10^e`
 
---------------------------------
 -- CONVENIENCE CONSTRUCTORS
 
 -- | Constructor for Finite Data Type
@@ -31,7 +30,6 @@ a*^m = Finite a m
 (*^-) :: Integer -> Integer -> Finite
 a*^-m = a*^(-m)
 
---------------------------------
 -- INFORMATION
 
 -- | Significant figures
@@ -41,7 +39,6 @@ sigfigs (Finite a _) = digits a
 -- | Order of Magnitude
 --   `n.nnnn*10^?`
 orderOfMagnitude :: Finite -> Integer
---orderOfMagnitude 0 = 0
 orderOfMagnitude (Finite a m) = digits a - 1 + m
 
 ----------------------------------------------------------------
@@ -49,10 +46,29 @@ orderOfMagnitude (Finite a m) = digits a - 1 + m
 ----------------------------------------------------------------
 
 instance Show Finite where
-    show (Finite a m) = "[" ++ (show a) ++ "*10^" ++ (show m) ++ "]"
+    show = showNatural
 
--- showFull :: Finite -> String
--- showFull (Finite a m) =
+-- | Show with component decomposition
+showNatural :: Finite -> String
+showNatural (Finite a m) = "[" ++ (show a) ++ "*10^" ++ (show m) ++ "]"
+
+-- | Show in full written form
+showFull :: Finite -> String
+showFull (Finite a m)
+    | m < 0 = show intPart ++ "." ++ leadingZeroes ++ show floatPart -- has decimals
+    | otherwise = show (a*10^m) -- no decimals
+  where
+    intPart = a `div` 10^(abs m)
+    floatPart = a - a `div` 10^(abs m) * 10^(abs m) -- not including leading 0's
+    leadingZeroes = replicate (fromIntegral $ abs m - digits floatPart) '0'
+
+-- | Show in Scientific form
+showScientific :: Finite -> String
+showScientific (Finite a m) = lead ++ decimals ++ "e" ++ show exponent
+  where
+    lead = [head (show a)]
+    decimals = if tail (show a) /= "" then "." ++ tail (show a) else ""
+    exponent = digits a + m - 1
 
 ----------------------------------------------------------------
 -- NUMBERNESS
@@ -79,6 +95,18 @@ instance Num Finite where
     signum (Finite a _) = Finite (signum a) 0
     
     fromInteger a = (a*10^16)*^-16 -- ^ Assumes IEEE Double precision
+
+-- | takes an integer and sets it to a certain sigfigs precision
+--   (instead of the default IEEE Double precision)
+fromIntegerWithPrecision :: Integer -> Integer -> Finite
+fromIntegerWithPrecision a p
+    | digits a > p = (a `div` 10^(digits a - p))*^(digits a - p) -- cut off end of int and give it that exponent
+    | otherwise = (a*10^(p - digits a))*^-(p - digits a) -- append zeroes to end and give it that exponent
+
+-- | takes an integer and another finite and turns the integer into
+--   a finite of the same precision (sigfigs)
+fromIntegerMatchingPrecision :: Integer -> Finite -> Finite
+fromIntegerMatchingPrecision a n = fromIntegerWithPrecision a (sigfigs n)
 
 ----------------------------------------------------------------
 -- EQUATABILITY & ORDERABILITY
@@ -123,11 +151,13 @@ instance RealFrac Finite where
 
 -- | Powers
 
-
+-- power :: Finite -> Finite -> Finite
+-- power (Finite a m) (Finite b n) =
 
 -- | Roots
 
-
+-- root :: Finite -> Finite -> Finite
+-- root (Finite a m) (Finite b n) =
 
 ----------------------------------------------------------------
 -- OTHER FUNCTIONS
@@ -137,8 +167,18 @@ instance RealFrac Finite where
 --   supply with a number and the number of significant figures you want to round to
 roundToPrecision :: Finite -> Integer -> Finite
 roundToPrecision am@(Finite a m) p
-    | d == p = am
+    | d <= p = am -- if equal or worse precision than specified, return original
     | otherwise = (a `div` 10^(d-p) + r) *^ (d-p+m) -- d-p is how many digits to take off the end of a
   where
       d = digits a
       r = if a `div` 10^(d-p-1) `mod` 10 >= 5 then 1 else 0 -- add 1 to the number if the digit after the precision is >= 5
+
+      
+----------------------------------------------------------------
+-- MATHEMATICAL CONSTANTS
+----------------------------------------------------------------
+
+-- piAtPrecision :: Integer -> Finite
+
+
+-- eAtPrecision :: Integer -> Finite
