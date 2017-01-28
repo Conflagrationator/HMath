@@ -4,6 +4,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 module Constraint.Addable where
 
@@ -14,17 +15,27 @@ import Structure
 ------------------------------------------------------------------------------
 -- | The Class
 
-class (Structure s) => Addable s where
-    add :: s -> s -> s
+class (Structure a, Structure b, Structure c) => Addable a b c | a b -> c where
+    add :: a -> b -> c
+    -- the return type of add is known
 
 ------------------------------------------------------------------------------
 -- | The Operator
 
-data Add s where
-    Add :: (Addable s) => s -> s -> Add s
+data Addition a b c where
+    Addition :: (Expression a n, Expression b m, Addable n m c) => a -> b -> Addition a b c
+    -- a & b determine n & m which determine c
 
-instance Show (Add s) where
-    show (Add a b) = "(" ++ show a ++ "+" ++ show b ++ ")"
+------------------------------------------------------------------------------
+-- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Addable s) => Expression (Add s) s where
-    evaluate (Add a b) = add a b
+instance (Structure c) => Expression (Addition a b c) c where
+    evaluate (Addition a b) = add (evaluate a) (evaluate b)
+
+-- ALL EXPRESSIONS ARE SHOWABLE
+
+instance Show (Addition a b c) where
+    show (Addition a b) = "( " ++ show a ++ " + " ++ show b ++ " )"
+
+------------------------------------------------------------------------------
+-- EXTENSIONS TO ALREADY DEFINED STRUCTURES

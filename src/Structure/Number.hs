@@ -1,6 +1,8 @@
 -- | Number
 ------------------------------------------------------------------------------
 
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Structure.Number where
 
 ------------------------------------------------------------------------------
@@ -9,19 +11,26 @@ import Structure
 import Constraint.Addable
 
 ------------------------------------------------------------------------------
+-- | Number data type
 
-data Number
-    = Absolute Integer
-    | Complex Integer Integer
+data Number = Absolute Integer
 
-instance Show Number where
-    show (Absolute a) = "[" ++ show a ++ "]"
-    show (Complex a b) = "[" ++ show a ++ "+" ++ show b ++ "i]"
+------------------------------------------------------------------------------
+-- ALL NUMBERS ARE STRUCTURES
+-- ALL STRUCTURES ARE EXPRESSIONS THAT EVALUATE TO THEMSELVES
+
+instance Expression Number Number where
+    evaluate a = a
 
 instance Structure Number
 
-instance Addable Number where
+-- ALL EXPRESSIONS MUST BE SHOWABLE
+
+instance Show Number where
+    show (Absolute a) = "[" ++ show a ++ "]"
+
+------------------------------------------------------------------------------
+-- CONSTRAINT & OPERATOR IMPLEMENTATION
+
+instance Addable Number Number Number where
     add (Absolute a) (Absolute b) = Absolute (a + b)
-    add (Absolute a) (Complex b c) = Complex (a + b) c
-    add (Complex a b) (Absolute c) = Complex a (b + c)
-    add (Complex a b) (Complex c d) = Complex (a + b) (c + d)
