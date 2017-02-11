@@ -1,4 +1,4 @@
--- | Addable
+-- | Vector Space
 ------------------------------------------------------------------------------
 
 {-# LANGUAGE GADTs #-}
@@ -6,36 +6,39 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
-module Constraint.Addable where
+module Constraint.MeasureSpace where
 
 ------------------------------------------------------------------------------
 
 import Structure
+import Structure.Number
+import Constraint.VectorSpace
 
 ------------------------------------------------------------------------------
 -- | The Class
 
-class (Structure a, Structure b, Structure c) => Addable a b c | a b -> c where
-    add :: Guard a -> Guard b -> Guard c
-    -- the return type of add is known
+class (VectorSpace a) => MeasureSpace a where
+    magnitude :: Guard a -> Guard Number
 
 ------------------------------------------------------------------------------
 -- | The Operator
 
-data Addition a b c where
-    Addition :: (Expression a n, Expression b m, Addable n m c) => a -> b -> Addition a b c
-    -- a & b determine n & m which determine c
+data Magnitude a where
+    Magnitude :: (MeasureSpace a) => a -> Magnitude a
 
 ------------------------------------------------------------------------------
 -- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Structure c) => Expression (Addition a b c) c where
-    evaluate (Addition a b) = add (evaluate a) (evaluate b)
+instance (Structure a) => Expression (Magnitude a) Number where
+    evaluate (Magnitude a) = magnitude (evaluate a)
 
 -- ALL EXPRESSIONS ARE SHOWABLE
 
-instance Show (Addition a b c) where
-    show (Addition a b) = "(" ++ show a ++ "+" ++ show b ++ ")"
+instance Show (Magnitude a) where
+    show (Magnitude a) = "|" ++ show a ++ "|"
 
 ------------------------------------------------------------------------------
 -- EXTENSIONS TO ALREADY DEFINED STRUCTURES
+
+instance MeasureSpace Number where
+    magnitude a = a

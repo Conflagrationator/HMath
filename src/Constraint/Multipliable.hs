@@ -1,4 +1,4 @@
--- | Addable
+-- | Multiplication
 ------------------------------------------------------------------------------
 
 {-# LANGUAGE GADTs #-}
@@ -6,7 +6,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
-module Constraint.Addable where
+module Constraint.Multipliable where
 
 ------------------------------------------------------------------------------
 
@@ -15,27 +15,27 @@ import Structure
 ------------------------------------------------------------------------------
 -- | The Class
 
-class (Structure a, Structure b, Structure c) => Addable a b c | a b -> c where
-    add :: Guard a -> Guard b -> Guard c
-    -- the return type of add is known
+class (Structure a, Structure b, Structure c) => Multipliable a b c | a b -> c where
+    multiply :: Guard a -> Guard b -> Guard c
+    -- the return type of multiplication is known
 
 ------------------------------------------------------------------------------
 -- | The Operator
 
-data Addition a b c where
-    Addition :: (Expression a n, Expression b m, Addable n m c) => a -> b -> Addition a b c
+data Multiplication a b c where
+    Multiplication :: (Expression a n, Expression b m, Multipliable n m c) => a -> b -> Multiplication a b c
     -- a & b determine n & m which determine c
 
 ------------------------------------------------------------------------------
 -- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Structure c) => Expression (Addition a b c) c where
-    evaluate (Addition a b) = add (evaluate a) (evaluate b)
+instance (Structure c) => Expression (Multiplication a b c) c where
+    evaluate (Multiplication a b) = multiply (evaluate a) (evaluate b)
 
 -- ALL EXPRESSIONS ARE SHOWABLE
 
-instance Show (Addition a b c) where
-    show (Addition a b) = "(" ++ show a ++ "+" ++ show b ++ ")"
+instance Show (Multiplication a b c) where
+    show (Multiplication a b) = "(" ++ show a ++ "*" ++ show b ++ ")"
 
 ------------------------------------------------------------------------------
 -- EXTENSIONS TO ALREADY DEFINED STRUCTURES

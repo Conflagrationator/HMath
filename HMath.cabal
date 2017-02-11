@@ -50,10 +50,16 @@ library
   exposed-modules:   Finite,
                      Unit,
                      Structure,
-                     -- Default Structure Additions
+                     -- Default Structures
                      Structure.Number,
-                     -- Default Constraint Additions
-                     Constraint.Addable
+                     Structure.Vector3D,
+                     -- Default Constraints
+                     Constraint.Addable,
+                     Constraint.Multipliable,
+                     Constraint.Powerable,
+                     Constraint.VectorSpace,
+                     Constraint.MeasureSpace,
+                     Constraint.InnerProductSpace
   
   -- Modules included in this library but not exported.
   other-modules:     Extensions

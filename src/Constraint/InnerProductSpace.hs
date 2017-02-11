@@ -1,4 +1,4 @@
--- | Addable
+-- | Inner Product Space
 ------------------------------------------------------------------------------
 
 {-# LANGUAGE GADTs #-}
@@ -6,36 +6,40 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
-module Constraint.Addable where
+module Constraint.InnerProductSpace where
 
 ------------------------------------------------------------------------------
 
 import Structure
+import Structure.Number
+import Constraint.MeasureSpace
+import Constraint.Multipliable -- for Number instance implementation
 
 ------------------------------------------------------------------------------
 -- | The Class
 
-class (Structure a, Structure b, Structure c) => Addable a b c | a b -> c where
-    add :: Guard a -> Guard b -> Guard c
-    -- the return type of add is known
+class (MeasureSpace a) => InnerProductSpace a where
+    innerProduct :: Guard a -> Guard a -> Guard Number
 
 ------------------------------------------------------------------------------
 -- | The Operator
 
-data Addition a b c where
-    Addition :: (Expression a n, Expression b m, Addable n m c) => a -> b -> Addition a b c
-    -- a & b determine n & m which determine c
+data InnerProduct a where
+    InnerProduct :: (InnerProductSpace a) => a -> a -> InnerProduct a
 
 ------------------------------------------------------------------------------
 -- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Structure c) => Expression (Addition a b c) c where
-    evaluate (Addition a b) = add (evaluate a) (evaluate b)
+instance (Structure a) => Expression (InnerProduct a) Number where
+    evaluate (InnerProduct a b) = innerProduct (evaluate a) (evaluate b)
 
 -- ALL EXPRESSIONS ARE SHOWABLE
 
-instance Show (Addition a b c) where
-    show (Addition a b) = "(" ++ show a ++ "+" ++ show b ++ ")"
+instance Show (InnerProduct a) where
+    show (InnerProduct a b) = "⟨" ++ show a ++ ", " ++ show b ++ "⟩"
 
 ------------------------------------------------------------------------------
 -- EXTENSIONS TO ALREADY DEFINED STRUCTURES
+
+instance InnerProductSpace Number where
+    innerProduct a b = multiply a b

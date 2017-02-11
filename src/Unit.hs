@@ -8,70 +8,73 @@ module Unit where
 import Extensions
 
 import Data.List
-
-------------------------------------------------------------------------------
--- CONVENIENCE
-------------------------------------------------------------------------------
-
-noUnit = Unit []
+import Data.Maybe
+import Data.Ratio
 
 ------------------------------------------------------------------------------
 -- UNIT
 ------------------------------------------------------------------------------
 
--- | Compound Unit for a number
---   Consists of all dimensional components
---   * Dimension
---   * Exponent (m^2?, m^3?, etc.)
-data Unit = Unit [(Dimension, Integer)]
+data Unit = Unit {
+    meter :: Integer,
+    kilogram :: Integer,
+    second :: Integer,
+    ampere :: Integer,
+    kelvin :: Integer,
+    mole :: Integer,
+    candela :: Integer}
 
+-- | Must have the same dimensions
 instance Eq Unit where
-    (Unit us) == (Unit vs) = us == vs
+    a == b = meter a == meter b && kilogram a == kilogram b && second a == second b && ampere a == ampere b && kelvin a == kelvin b && mole a == mole b && candela a == candela b
 
+-- | Straightforward showing method
 instance Show Unit where
-    show (Unit us) = unitsString
+    show u = intercalate "*" $ map (\d -> if (fst d) /= 1 then (snd d) ++ "^" ++ show (fst d) else (snd d)) visible
       where
-        unitDivisions = span (\(_, e) -> e >= 0) $ sortBy (\(_, e1) (_, e2) -> compare e2 e1) us -- split based on positive powers and negative powers (above & below the division)
-        upperUnits = fst unitDivisions -- the units in the numerator
-        lowerUnits = snd unitDivisions -- the units in the denominator
-        showUnit (d, e) = show d ++ if e == 1 then "" else "^" ++ show (abs e) -- abs because we put it under a division later
-        upperUnitsString = if upperUnits /= [] then "(" ++ intercalate "*" (map showUnit upperUnits) ++ ")" else "1"
-        lowerUnitsString = if lowerUnits /= [] then "/(" ++ intercalate "*" (map showUnit lowerUnits) ++ ")" else "" -- includes the "/" (or not) here
-        unitsString = if unitDivisions /= ([], []) then "{:" ++ upperUnitsString ++ lowerUnitsString ++ ":}" else ""
+        dimensions = [(meter u, "m"), (kilogram u, "kg"), (second u, "s"), (ampere u, "A"), (kelvin u, "K"), (mole u, "mol"), (candela u, "cd")]
+        visible = filter (\d -> fst d /= 0) dimensions
 
 ------------------------------------------------------------------------------
--- DIMENSION
+-- COMBINATION
+
+-- | Must be same unit
+addUnits :: Unit -> Unit -> Maybe Unit
+addUnits a b = if a == b then Just a else Nothing
+
+multiplyUnits :: Unit -> Unit -> Unit -- guaranteed to succeed
+multiplyUnits a b = Unit {
+    meter = meter a + meter b,
+    kilogram = kilogram a + kilogram b,
+    second = second a + second b,
+    ampere = ampere a + ampere b,
+    kelvin = kelvin a + kelvin b,
+    mole = mole a + mole b,
+    candela = candela a + candela b}
+
+raiseUnits :: Unit -> Rational -> Maybe Unit
+raiseUnits u e = if length (catMaybes [m, kg, s, a, k, mol, cd]) /= 7 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd}
+  where
+    castToInteger :: Rational -> Maybe Integer
+    castToInteger n = if denominator n == 1 then Just (numerator n) else Nothing
+    m = castToInteger $ fromIntegral (meter u) * e
+    kg = castToInteger $ fromIntegral (kilogram u) * e
+    s = castToInteger $ fromIntegral (second u) * e
+    a = castToInteger $ fromIntegral (ampere u) * e
+    k = castToInteger $ fromIntegral (kelvin u) * e
+    mol = castToInteger $ fromIntegral (mole u) * e
+    cd = castToInteger $ fromIntegral (candela u) * e
+
 ------------------------------------------------------------------------------
+-- DEFAULT UNITS
 
--- | The SI Units, to be paired with numbers for aid in computation
-data Dimension
-    = Meter -- ^ Length
-    | KiloGram -- ^ Mass
-    | Second -- ^ Time
-    | Ampere -- ^ Electric Current
-    | Kelvin -- ^ Temperature
-    | Mole -- ^ Amount of Substance
-    | Candela -- ^ Luminous Intensity
-    deriving (Eq)
+unitless = Unit {meter = 0, kilogram = 0, second = 0, ampere = 0, kelvin = 0, mole = 0, candela = 0}
 
-instance Show Dimension where
-    show Meter = "m"
-    show KiloGram = "kg"
-    show Second = "s"
-    show Ampere = "A"
-    show Kelvin = "K"
-    show Mole = "mol"
-    show Candela = "Cd"
-
-------------------------------------------------------------------------------
--- UNIT MATHEMATICS
-------------------------------------------------------------------------------
-
--- | Addition of Units
-
--- -- | Multiplication of Units
--- multiplyUnits :: Unit -> Unit -> Unit
--- multiplyUnits u v = foldUnique multiplyUnitComponents u v
---   where
---     multiplyUnitComponents :: (Dimension, Integer) -> (Dimension, Integer) -> Maybe (Dimension, Integer)
---     multiplyUnitComponents (dim1, exp1) (dim2, exp2) = if dim1 == dim2 then Just (dim1, exp1 + exp2) else Nothing
+-- SI units
+meters = unitless {meter = 1}
+kilograms = unitless {kilogram = 1}
+seconds = unitless {second = 1}
+amperes = unitless {ampere = 1}
+kelvins = unitless {kelvin = 1} -- plural of kelvin is kelvin, so added an s here to differentiate
+moles = unitless {mole = 1}
+candelas = unitless {candela = 1}
