@@ -15,7 +15,7 @@ import Structure
 ------------------------------------------------------------------------------
 -- | The Class
 
-class (Structure a, Structure b, Structure c) => Multipliable a b c | a b -> c where
+class (Value a, Value b, Value c) => Multipliable a b c | a b -> c where
     multiply :: Guard a -> Guard b -> Guard c
     -- the return type of multiplication is known
 
@@ -29,7 +29,7 @@ data Multiplication a b c where
 ------------------------------------------------------------------------------
 -- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Structure c) => Expression (Multiplication a b c) c where
+instance (Value c) => Expression (Multiplication a b c) c where
     evaluate (Multiplication a b) = multiply (evaluate a) (evaluate b)
 
 -- ALL EXPRESSIONS ARE SHOWABLE
@@ -38,4 +38,4 @@ instance Show (Multiplication a b c) where
     show (Multiplication a b) = "(" ++ show a ++ "*" ++ show b ++ ")"
 
 ------------------------------------------------------------------------------
--- EXTENSIONS TO ALREADY DEFINED STRUCTURES
+-- EXTENSIONS TO ALREADY DEFINED VALUES

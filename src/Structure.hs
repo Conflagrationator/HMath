@@ -1,4 +1,4 @@
--- | The Description of the Structure of Mathematical Expression Data
+-- | The Description of the Value of Mathematical Expression Data
 ------------------------------------------------------------------------------
 
 {-# LANGUAGE FunctionalDependencies #-}
@@ -20,14 +20,14 @@ class (Show e, Show r) => Expression e r | e -> r where
     -- Either String r, Left is for failure message
 
 ------------------------------------------------------------------------------
--- | Structure
+-- | Value
 
-class (Expression s s) => Structure s
+class (Expression s s) => Value s
 
 ------------------------------------------------------------------------------
 
 -- TODO: make it work with AsciiMath
--- TODO: make it possible for expressions to be inside structures (like vectors with expressions inside)
+-- TODO: make it possible for expressions to be inside Values (like vectors with expressions inside)
 
 data Guard a = Success a | Failure String -- TODO: put in Extensions
 
@@ -35,7 +35,7 @@ instance (Show r) => Show (Guard r) where
     show (Success a) = show a
     show (Failure s) = s
 
-instance (Structure r) => Expression (Guard r) r where
+instance (Value r) => Expression (Guard r) r where
     evaluate (Success r) = Success r
     evaluate (Failure s) = Failure s
 

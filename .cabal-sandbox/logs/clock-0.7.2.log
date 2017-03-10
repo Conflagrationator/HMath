@@ -1,0 +1,34 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14741/clock-0.7.2'
+Configuring clock-0.7.2...
+Building clock-0.7.2...
+Preprocessing library clock-0.7.2...
+Clock.hsc:44:9: warning: 'hsc_alignment' macro redefined [-Wmacro-redefined]
+#define hsc_alignment(t ) hsc_printf ( "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__));
+        ^
+/Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/lib/ghc-8.0.2/template-hsc.h:88:9: note: previous definition is here
+#define hsc_alignment(t...) \
+        ^
+1 warning generated.
+[1 of 1] Compiling System.Clock     ( dist/dist-sandbox-a79a4d0f/build/System/Clock.hs, dist/dist-sandbox-a79a4d0f/build/System/Clock.o )
+
+System/Clock.hsc:136:1: warning: [-Wincomplete-patterns]
+    Pattern match(es) are non-exhaustive
+    In an equation for ‘clockToConst’:
+        Patterns not matched: MonotonicRaw
+[1 of 1] Compiling System.Clock     ( dist/dist-sandbox-a79a4d0f/build/System/Clock.hs, dist/dist-sandbox-a79a4d0f/build/System/Clock.p_o )
+
+System/Clock.hsc:136:1: warning: [-Wincomplete-patterns]
+    Pattern match(es) are non-exhaustive
+    In an equation for ‘clockToConst’:
+        Patterns not matched: MonotonicRaw
+Running Haddock for clock-0.7.2...
+Preprocessing library clock-0.7.2...
+Haddock coverage:
+ 100% (  9 /  9) in 'System.Clock'
+Documentation created: dist/dist-sandbox-a79a4d0f/doc/html/clock/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-clock-0.713564252281899894091.2
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/clock-0.7.2-6ZjQ4liQAtMEQ8sxJKD0xY
+Registering clock-0.7.2...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14741/clock-0.7.2'

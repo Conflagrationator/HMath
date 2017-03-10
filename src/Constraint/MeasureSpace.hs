@@ -11,7 +11,7 @@ module Constraint.MeasureSpace where
 ------------------------------------------------------------------------------
 
 import Structure
-import Structure.Number
+import Value.Number
 import Constraint.VectorSpace
 
 ------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ data Magnitude a where
 ------------------------------------------------------------------------------
 -- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Structure a) => Expression (Magnitude a) Number where
+instance (Value a) => Expression (Magnitude a) Number where
     evaluate (Magnitude a) = magnitude (evaluate a)
 
 -- ALL EXPRESSIONS ARE SHOWABLE
@@ -38,7 +38,7 @@ instance Show (Magnitude a) where
     show (Magnitude a) = "|" ++ show a ++ "|"
 
 ------------------------------------------------------------------------------
--- EXTENSIONS TO ALREADY DEFINED STRUCTURES
+-- EXTENSIONS TO ALREADY DEFINED VALUES
 
 instance MeasureSpace Number where
     magnitude a = a

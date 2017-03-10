@@ -11,7 +11,7 @@ module Constraint.InnerProductSpace where
 ------------------------------------------------------------------------------
 
 import Structure
-import Structure.Number
+import Value.Number
 import Constraint.MeasureSpace
 import Constraint.Multipliable -- for Number instance implementation
 
@@ -30,7 +30,7 @@ data InnerProduct a where
 ------------------------------------------------------------------------------
 -- ALL OPERATORS ARE EXPRESSIONS
 
-instance (Structure a) => Expression (InnerProduct a) Number where
+instance (Value a) => Expression (InnerProduct a) Number where
     evaluate (InnerProduct a b) = innerProduct (evaluate a) (evaluate b)
 
 -- ALL EXPRESSIONS ARE SHOWABLE
@@ -39,7 +39,7 @@ instance Show (InnerProduct a) where
     show (InnerProduct a b) = "⟨" ++ show a ++ ", " ++ show b ++ "⟩"
 
 ------------------------------------------------------------------------------
--- EXTENSIONS TO ALREADY DEFINED STRUCTURES
+-- EXTENSIONS TO ALREADY DEFINED VALUES
 
 instance InnerProductSpace Number where
     innerProduct a b = multiply a b

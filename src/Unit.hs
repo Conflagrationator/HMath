@@ -52,8 +52,8 @@ multiplyUnits a b = Unit {
     mole = mole a + mole b,
     candela = candela a + candela b}
 
-raiseUnits :: Unit -> Rational -> Maybe Unit
-raiseUnits u e = if length (catMaybes [m, kg, s, a, k, mol, cd]) /= 7 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd}
+raiseUnit :: Unit -> Rational -> Maybe Unit
+raiseUnit u e = if length (catMaybes [m, kg, s, a, k, mol, cd]) /= 7 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd}
   where
     castToInteger :: Rational -> Maybe Integer
     castToInteger n = if denominator n == 1 then Just (numerator n) else Nothing

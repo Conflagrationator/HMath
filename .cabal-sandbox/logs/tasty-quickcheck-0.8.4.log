@@ -1,0 +1,20 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-16158/tasty-quickcheck-0.8.4'
+Configuring tasty-quickcheck-0.8.4...
+Building tasty-quickcheck-0.8.4...
+Preprocessing library tasty-quickcheck-0.8.4...
+[1 of 1] Compiling Test.Tasty.QuickCheck ( Test/Tasty/QuickCheck.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/QuickCheck.o )
+[1 of 1] Compiling Test.Tasty.QuickCheck ( Test/Tasty/QuickCheck.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/QuickCheck.p_o )
+Running Haddock for tasty-quickcheck-0.8.4...
+Preprocessing library tasty-quickcheck-0.8.4...
+Haddock coverage:
+  92% ( 11 / 12) in 'Test.Tasty.QuickCheck'
+  Missing documentation for:
+    QC (Test/Tasty/QuickCheck.hs:50)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/tasty-quickcheck/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-tasty-quickcheck-0.8178448449274243042.4
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/tasty-quickcheck-0.8.4-KUxPCF7JRDD2b18diocKZY
+Registering tasty-quickcheck-0.8.4...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-16158/tasty-quickcheck-0.8.4'

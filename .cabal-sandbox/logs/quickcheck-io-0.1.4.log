@@ -1,0 +1,22 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-12686/quickcheck-io-0.1.4'
+Configuring quickcheck-io-0.1.4...
+Building quickcheck-io-0.1.4...
+Preprocessing library quickcheck-io-0.1.4...
+[1 of 1] Compiling Test.QuickCheck.IO ( src/Test/QuickCheck/IO.hs, dist/dist-sandbox-a79a4d0f/build/Test/QuickCheck/IO.o )
+[1 of 1] Compiling Test.QuickCheck.IO ( src/Test/QuickCheck/IO.hs, dist/dist-sandbox-a79a4d0f/build/Test/QuickCheck/IO.p_o )
+Running Haddock for quickcheck-io-0.1.4...
+Preprocessing library quickcheck-io-0.1.4...
+Haddock coverage:
+   0% (  0 /  3) in 'Test.QuickCheck.IO'
+  Missing documentation for:
+    Module header
+     (src/Test/QuickCheck/IO.hs:9)
+    propertyIO (src/Test/QuickCheck/IO.hs:15)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/quickcheck-io/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-quickcheck-io-0.11148079871137522503.4
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/quickcheck-io-0.1.4-4MNNBYYH1iA9DqAM8PnckJ
+Registering quickcheck-io-0.1.4...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-12686/quickcheck-io-0.1.4'

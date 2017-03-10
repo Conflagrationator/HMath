@@ -1,0 +1,57 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-16609/tasty-hunit-0.9.2'
+Configuring tasty-hunit-0.9.2...
+Building tasty-hunit-0.9.2...
+Preprocessing library tasty-hunit-0.9.2...
+[1 of 3] Compiling Test.Tasty.HUnit.Orig ( Test/Tasty/HUnit/Orig.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/HUnit/Orig.o )
+[2 of 3] Compiling Test.Tasty.HUnit.Steps ( Test/Tasty/HUnit/Steps.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/HUnit/Steps.o )
+
+Test/Tasty/HUnit/Steps.hs:4:1: warning: [-Wunused-imports]
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[3 of 3] Compiling Test.Tasty.HUnit ( Test/Tasty/HUnit.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/HUnit.o )
+[1 of 3] Compiling Test.Tasty.HUnit.Orig ( Test/Tasty/HUnit/Orig.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/HUnit/Orig.p_o )
+[2 of 3] Compiling Test.Tasty.HUnit.Steps ( Test/Tasty/HUnit/Steps.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/HUnit/Steps.p_o )
+
+Test/Tasty/HUnit/Steps.hs:4:1: warning: [-Wunused-imports]
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[3 of 3] Compiling Test.Tasty.HUnit ( Test/Tasty/HUnit.hs, dist/dist-sandbox-a79a4d0f/build/Test/Tasty/HUnit.p_o )
+Running Haddock for tasty-hunit-0.9.2...
+Preprocessing library tasty-hunit-0.9.2...
+
+Test/Tasty/HUnit/Steps.hs:4:1: warning: [-Wunused-imports]
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+Haddock coverage:
+  65% ( 13 / 20) in 'Test.Tasty.HUnit.Orig'
+  Missing documentation for:
+     (Test/Tasty/HUnit/Orig.hs:80)
+     (Test/Tasty/HUnit/Orig.hs:83)
+     (Test/Tasty/HUnit/Orig.hs:86)
+     (Test/Tasty/HUnit/Orig.hs:89)
+     (Test/Tasty/HUnit/Orig.hs:125)
+     (Test/Tasty/HUnit/Orig.hs:128)
+     (Test/Tasty/HUnit/Orig.hs:161)
+  50% (  1 /  2) in 'Test.Tasty.HUnit.Steps'
+  Missing documentation for:
+    Module header
+  70% ( 16 / 23) in 'Test.Tasty.HUnit'
+  Missing documentation for:
+     (Test/Tasty/HUnit/Orig.hs:80)
+     (Test/Tasty/HUnit/Orig.hs:83)
+     (Test/Tasty/HUnit/Orig.hs:86)
+     (Test/Tasty/HUnit/Orig.hs:89)
+     (Test/Tasty/HUnit/Orig.hs:125)
+     (Test/Tasty/HUnit/Orig.hs:128)
+     (Test/Tasty/HUnit/Orig.hs:161)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/tasty-hunit/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-tasty-hunit-0.9178448449274243042.2
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/tasty-hunit-0.9.2-6Ml0Yrym4N6A1v9QCbCpzV
+Registering tasty-hunit-0.9.2...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-16609/tasty-hunit-0.9.2'

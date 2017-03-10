@@ -3,64 +3,47 @@ HMATH
 
 A General Math Library that aims to provide support for any applications needing robust mathematical equation representation, evaluation and manipulation support
 
-Structure
+Mathematical Structure
 --------
+
+The Structure provided for encoding expressions is designed to let the user of the library extend it with any value structures or operators as they see fit and extend upon the default value structures and operators.
+
+### Expressions
+
+Expressions are set up in a tree fashion:
+```
+(4+5)/3.2*(x-3)
+
+     /
+  ┌──┴───┐
+  +     *
+ ┌┴┐   ┌┴──┐
+ 4 5  3.2  -
+          ┌┴┐
+          x 3
+```
+
+All Types in the tree (all types that are involved in calculations) are members of the class `Expression`. The Function of `Expression`s is simply to evaluate everything below them (recursively). This is done via the `evaluate` function.
 
 ### Values
 
-Values fundementally have a number-y part and a unit part
-```
-5.3 Hz
-```
+The types that encode values like numbers or vectors are called `Structures`.
 
-#### Numbers
+`Structures` are members of the class `Expression` and are a specific subset that `evaluate` to themselves (making them leaf nodes of the tree).
 
-Numbers are known in a few diffrent forms, each for their specific use case
+Some defalut `Structure` Types/Constructors include:
+- `Number`: `Absolute`, `Measure`
 
-* Real Finite       -- "normal" inputted numbers and everything measured
-* Absolute Integer  -- numbers as used in math for finding simplest forms
-* Unknown String    -- the representation of variables
-* Infinity Bool     -- Infinity, whrere true is +∞ and false is -∞
-* Undefined         -- the value when a computation cannot give a useful solution
+### Operators
 
+The types that evaluate `Expressions` into new `Expressions` are `Operators`.
 
-#### Units
+An `Operator` is defined with respect to a `class` which acts as a constraint on `Expressions` in that they must have the typeclass' functions defined to be used in that operator. This ensures type safety when calling the operator and allows for the `Operator` to predict the return type of the operation. That is, if any `Expression` wants to be added (via `Addition`), they must first declare how they are `Addable` by defining the function `add`.
 
-Units are stored as a combination of SI Units:
+Some default constraint classes with their respective `Operator`s include:
+- `Addable` : `Addition`
+- `Multipliable` : `Multiplication`
+- `Powerable` : `Power`
+- `VectorSpace` : `Negation` (& `Addition` & Scalar `Multiplication`)
 
-* Meter     -- Length
-* KiloGram  -- Mass
-* Second    -- Time
-* Ampere    -- Electric Current
-* Kelvin    -- Temperature
-* Mole      -- Amount of Substance
-* Candela   -- Luminous Intensity
-
-they are stored as a list of (Dimension, Power) pairs
-```
-Newtons === [(KiloGram, 1), (Meter, 1), (Second, -2)]
-```
-
-These all have integer powers
-(I haven't come across a unit that doesn't!)
-
-### Equations
-
-Equations are set up in a tree fashion:
-```
-4+5=3.2*(x-3)
-
-   =
- ┌─┴───┐
- +     *
-┌┴┐   ┌┴──┐
-4 5  3.2  -
-         ┌┴┐
-         x 3
-```
-
-#### Evaluators
-
-
-
-#### Identifiers
+Constraint classes can also be subclasses of others. For instance, `VectorSpace` is a subclass of `Addable` since vectors are addable and it is also a subclass of `Multipliable`, but only for a definition of scalar multiplication.
