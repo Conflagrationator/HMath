@@ -22,7 +22,8 @@ data Unit = Unit {
     ampere :: Integer,
     kelvin :: Integer,
     mole :: Integer,
-    candela :: Integer}
+    candela :: Integer,
+    dollar :: Integer}
 
 -- | Must have the same dimensions
 instance Eq Unit where
@@ -50,10 +51,11 @@ multiplyUnits a b = Unit {
     ampere = ampere a + ampere b,
     kelvin = kelvin a + kelvin b,
     mole = mole a + mole b,
-    candela = candela a + candela b}
+    candela = candela a + candela b,
+    dollar = dollar a + dollar b}
 
 raiseUnit :: Unit -> Rational -> Maybe Unit
-raiseUnit u e = if length (catMaybes [m, kg, s, a, k, mol, cd]) /= 7 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd}
+raiseUnit u e = if length (catMaybes [m, kg, s, a, k, mol, cd, usd]) /= 7 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd, dollar = fromJust usd}
   where
     castToInteger :: Rational -> Maybe Integer
     castToInteger n = if denominator n == 1 then Just (numerator n) else Nothing
@@ -64,11 +66,12 @@ raiseUnit u e = if length (catMaybes [m, kg, s, a, k, mol, cd]) /= 7 then Nothin
     k = castToInteger $ fromIntegral (kelvin u) * e
     mol = castToInteger $ fromIntegral (mole u) * e
     cd = castToInteger $ fromIntegral (candela u) * e
+    usd = castToInteger $ fromIntegral (dollar u) * e
 
 ------------------------------------------------------------------------------
 -- DEFAULT UNITS
 
-unitless = Unit {meter = 0, kilogram = 0, second = 0, ampere = 0, kelvin = 0, mole = 0, candela = 0}
+unitless = Unit {meter = 0, kilogram = 0, second = 0, ampere = 0, kelvin = 0, mole = 0, candela = 0, dollar = 0}
 
 -- SI units
 meters = unitless {meter = 1}
@@ -78,3 +81,4 @@ amperes = unitless {ampere = 1}
 kelvins = unitless {kelvin = 1} -- plural of kelvin is kelvin, so added an s here to differentiate
 moles = unitless {mole = 1}
 candelas = unitless {candela = 1}
+dollars = unitless {dollar = 1}

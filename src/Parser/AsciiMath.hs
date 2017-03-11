@@ -1,6 +1,8 @@
 -- Parsing AsciiMath
 --------------------------------------------------------------------------------
 
+{-# LANGUAGE TypeFamilies #-}
+
 module Parser.AsciiMath where
 
 --------------------------------------------------------------------------------
@@ -8,6 +10,7 @@ module Parser.AsciiMath where
 import Structure
 import Unit
 import Value.Number
+import Value.Variable
 import Value.Vector3D
 import Constraint.Addable
 import Constraint.Multipliable
@@ -59,14 +62,21 @@ data R = RParen String
 
 -- STRUCTURE
 
--- | "Simple Expressions"
-data S = Single C | Group L E R | Unary U S | Binary B S S | Str String
-
--- | "Complex Expressions"
-data E = Simple S E | Frac S S | Sub S S | Sup S S | SubSup S S S
+-- | "Expressions"
+data E = Single C | Group L E R | Unary U E | Binary B E E | Str String
 
 --------------------------------------------------------------------------------
 -- LEXER
+
+-- | Consumes any space in front
+spaceConsumer :: Parser ()
+spaceConsumer = L.space (void spaceChar) lineComment blockComment
+  where lineComment  = L.skipLineComment "//"
+        blockComment = L.skipBlockComment "/*" "*/"
+
+-- | Parses a symbol then consumes any space after
+symbol :: String -> Parser String
+symbol = L.symbol spaceConsumer
 
 -- | Parses a float and gives a Double back
 number :: Parser Double
@@ -80,16 +90,16 @@ integer = L.integer
 identifier :: Parser String
 identifier = do
     a <- letterChar
-    s <- many alphaNumChar
+    s <- many (alphaNumChar <|> char '_')
     return $ a:s
 
 -- | Parses a valid Left Parentheses
 l :: Parser String
-l = choice (map string ["(:", "{:", "(", "[", "{"]) <?> "opening bracket"
+l = choice (map symbol ["(:", "{:", "(", "[", "{"])
 
 -- | Parses a valid Right Parentheses
 r :: Parser String
-r = choice (map string [":)", ":}", ")", "]", "}"]) <?> "closing bracket"
+r = choice (map symbol [":)", ":}", ")", "]", "}"])
 
 --------------------------------------------------------------------------------
 -- PARSER
@@ -111,20 +121,8 @@ parseNumb = do
 -- | Parses a defined constant into the token data type
 parseConst :: Parser C
 parseConst = do
-    s <- choice (map string (sort constants))
+    s <- choice (map symbol (sort constantSymbols))
     return $ Const s
-
--- | Parses a unary operator into the token data type
-parseUnOp :: Parser U
-parseUnOp = do
-    s <- choice (map string (sort unaryOperators))
-    return $ UnOp s
-
--- | Parses a binary operator into the token data type
-parseBinOp :: Parser B
-parseBinOp = do
-    s <- choice (map string (sort binaryOperators))
-    return $ BinOp s
 
 -- | Parses a left parentheses into the token data type
 parseLParen :: Parser L
@@ -139,114 +137,41 @@ parseRParen = do
     return $ RParen s
 
 -- | Parse a singleton
-parseSingle :: Parser S
+parseSingle :: Parser E
 parseSingle = do
     c <- parseC
     return $ Single c
 
 -- | Parse a Grouped Expression
-parseGroup :: Parser S
+parseGroup :: Parser E
 parseGroup = do
     lp <- parseL
     e <- parseE
     rp <- parseR
     return $ Group lp e rp
 
--- | Parses a Unary Expression
-parseUnary :: Parser S
-parseUnary = do
-    f <- parseU
-    s <- parseS
-    return $ Unary f s
-
--- | Parses a prefix Binary Expression
-parsePrefixBinary :: Parser S
-parsePrefixBinary = do
-    f <- parseB
-    a <- parseS
-    b <- parseS
-    return $ Binary f a b
-
--- | Parses an infix Binary Expression
-parseInfixBinary :: Parser S -- FIXME: left recursive
-parseInfixBinary = do
-    a <- parseS
-    f <- parseB
-    b <- parseS
-    return $ Binary f a b
-
 -- | Parses a String Literal
-parseStr :: Parser S
+parseStr :: Parser E
 parseStr = do
     s <- between (char '"') (char '"') (many anyChar) <?> "string"
     return $ Str s
-
--- | Parses a Simple Expression
-parseSimple :: Parser E
-parseSimple = do
-    s <- parseS
-    e <- parseE
-    return $ Simple s e
-
--- | Parses a Fraction
-parseFrac :: Parser E
-parseFrac = do
-    a <- parseS
-    char '/'
-    b <- parseS
-    return $ Frac a b
-
--- | Parses a Subscript Expression
-parseSub :: Parser E
-parseSub = do
-    a <- parseS
-    char '_'
-    b <- parseS
-    return $ Sub a b
-
--- | Parses a Superscript Expression
-parseSup :: Parser E
-parseSup = do
-    a <- parseS
-    char '^'
-    b <- parseS
-    return $ Sup a b
-
--- | Parses a Subscript & Superscript Expression
-parseSubSup :: Parser E
-parseSubSup = do
-    a <- parseS
-    char '_'
-    b <- parseS
-    char '^'
-    c <- parseS
-    return $ SubSup a b c
 
 -- TOGETHER
 
 parseC :: Parser C
 parseC = parseConst <|> parseIdent <|> parseNumb <?> "constant term"
 
-parseU :: Parser U
-parseU = parseUnOp <?> "unary operator"
-
-parseB :: Parser B
-parseB = parseBinOp <?> "binary operator"
-
 parseL :: Parser L
-parseL = parseLParen
+parseL = parseLParen <?> "opening bracket"
 
 parseR :: Parser R
-parseR = parseRParen
+parseR = parseRParen <?> "closing bracket"
 
-parseTerm :: Parser S
-parseTerm = parseGroup <|> parseSingle
-
-parseS :: Parser S
-parseS = makeExprParser parseTerm operatorTable <|> parseStr
+parseTerm :: Parser E
+parseTerm = parseGroup <|> parseSingle <?> "term"
 
 parseE :: Parser E
-parseE = try parseSimple <|> try parseFrac <|> try parseSub <|> try parseSup <|> parseSubSup -- TODO: check for consumption errors
+parseE = makeExprParser parseTerm operatorTable -- <|> parseStr -- TODO: add support for strings later if necessary
 
 -- OVERALL
 
@@ -262,25 +187,45 @@ parseExpr = do
 -- RESERVED SYMBOLS
 
 constants = [
-    "pi"]
+    ("pi", Measure pi unitless)]
 
-unaryOperators = [
-    "-"]
+constantSymbols = map fst constants
 
-binaryOperators = [
-    "+",
-    "*"]
+prefix :: String -> Operator Parser E
+prefix s = Prefix (Unary (UnOp s) <$ symbol s)
+
+infixL :: String -> Operator Parser E
+infixL s = InfixL (Binary (BinOp s) <$ symbol s)
+
+infixN :: String -> Operator Parser E
+infixN s = InfixN (Binary (BinOp s) <$ symbol s)
+
+infixR :: String -> Operator Parser E
+infixR s = InfixR (Binary (BinOp s) <$ symbol s)
 
 operatorTable = [
-    [Prefix (Unary (UnOp "-") <$ string "-")],
-    [InfixL (Binary (BinOp "*") <$ string "*"), InfixL (Binary (BinOp "/") <$ string "/")],
-    [InfixL (Binary (BinOp "+") <$ string "+"), InfixL (Binary (BinOp "-") <$ string "-")]]
+    [infixR "^"],
+    [prefix "-"],
+    [infixL "*", infixL "/"],
+    [infixL "+", infixL "-"]]
 
--- TODO: Make unit converter with lists of strings to match and the associated
--- TODO: Double -> Double function that will convert it to SI
+--------------------------------------------------------------------------------
+-- TRANSLATOR
 
--- TODO: Also, include currency as a unit ($) with USD as the SI standard
--- TODO: (for $/kWh etc.)
+-- data C = Ident String | Numb Double | Const String
+-- data U = UnOp String
+-- data B = BinOp String
+-- data L = LParen String
+-- data R = RParen String
+-- data E = Single C | Group L E R | Unary U E | Binary B E E | Str String
+
+-- translate :: E -> Guard e
+-- translate (Single c) = translateC c
+-- 
+-- translateC :: C -> Guard e
+-- translateC (Ident s) = Success $ Variable s
+-- translateC (Numb n) = Success $ Measure n unitless
+-- translateC (Const s) = undefined
 
 --------------------------------------------------------------------------------
 -- DEBUGGING
@@ -302,16 +247,9 @@ instance Show L where
 instance Show R where
     show (RParen s) = "[R: " ++ s ++ "]"
 
-instance Show S where
-    show (Single c) = "[S: " ++ show c ++ "]"
-    show (Group l e r) = "[S: " ++ show l ++ " : " ++ show e ++ " : " ++ show r ++ "]"
-    show (Unary f a) = "[S: " ++ show f ++ " : " ++ show a ++ "]"
-    show (Binary f a b) = "[S: " ++ show f ++ " : " ++ show a ++ " : " ++ show b ++ "]"
-    show (Str s) = "[S: " ++ s ++ "]"
-
 instance Show E where
-    show (Simple s e) = "[E: " ++ show s ++ " : " ++ show e ++ "]"
-    show (Frac a b) = "[E: " ++ show a ++ " : " ++ show b ++ "]"
-    show (Sub a b) = "[E: " ++ show a ++ " : " ++ show b ++ "]"
-    show (Sup a b) = "[E: " ++ show a ++ " : " ++ show b ++ "]"
-    show (SubSup a b c) = "[E: " ++ show a ++ " : " ++ show b ++ " : " ++ show c ++ "]"
+    show (Single c) = "[E: " ++ show c ++ "]"
+    show (Group l e r) = "[E: " ++ show l ++ " : " ++ show e ++ " : " ++ show r ++ "]"
+    show (Unary f a) = "[E: " ++ show f ++ " : " ++ show a ++ "]"
+    show (Binary f a b) = "[E: " ++ show f ++ " : " ++ show a ++ " : " ++ show b ++ "]"
+    show (Str s) = "[E: " ++ s ++ "]"

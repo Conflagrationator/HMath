@@ -52,6 +52,7 @@ library
                       Structure,
                       -- Default Value
                       Value.Number,
+                      Value.Variable,
                       Value.Vector3D,
                       -- Default Constraints
                       Constraint.Addable,
