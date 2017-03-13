@@ -33,13 +33,13 @@ instance Value Number
 -- ALL EXPRESSIONS MUST BE SHOWABLE
 
 instance Show Number where
-    show (Measure a u) = "[" ++ show a ++ show u ++ "]"
+    show (Measure a u) = " " ++ show a ++ show u ++ " "
 
 ------------------------------------------------------------------------------
 -- CONSTRAINT & OPERATOR IMPLEMENTATION
 
 instance Addable Number Number Number where
-    add (Success (Measure a u)) (Success (Measure b v)) = if isJust (addUnits u v) then Success $ Measure (a * b) (fromJust (addUnits u v)) else Failure $ "tried to add numbers with two different units"
+    add (Success (Measure a u)) (Success (Measure b v)) = if isJust (addUnits u v) then Success $ Measure (a + b) (fromJust (addUnits u v)) else Failure $ "tried to add numbers with two different units"
     add (Failure s) _ = Failure s
     add _ (Failure s) = Failure s
 

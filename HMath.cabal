@@ -54,6 +54,7 @@ library
                       Value.Number,
                       Value.Variable,
                       Value.Vector3D,
+                      Value.Matrix,
                       -- Default Constraints
                       Constraint.Addable,
                       Constraint.Multipliable,

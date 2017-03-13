@@ -23,6 +23,7 @@ import Data.Maybe
 
 data Variable
     = Variable String
+    -- TODO: make an "Unevaluated Expression" form that will encapsulate all changes
 
 ------------------------------------------------------------------------------
 -- ALL NUMBERS ARE VALUES

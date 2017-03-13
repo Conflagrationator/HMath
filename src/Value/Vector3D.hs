@@ -25,7 +25,7 @@ import Data.Maybe
 data Vector3D = Vector3D Double Double Double Unit
 
 ------------------------------------------------------------------------------
--- ALL NUMBERS ARE VALUES
+-- ALL VECTORS ARE VALUES
 -- ALL VALUES ARE EXPRESSIONS THAT EVALUATE TO THEMSELVES
 
 instance Expression Vector3D Vector3D where

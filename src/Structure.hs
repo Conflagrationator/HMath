@@ -46,3 +46,11 @@ hasFailed _ = False
 hasSucceeded :: Guard a -> Bool
 hasSucceeded (Success _) = True
 hasSucceeded _ = False
+
+failureMessage :: Guard a -> String
+failureMessage (Failure s) = s
+failureMessage _ = error "Tried to get a falure message from a success"
+
+fromSuccess :: Guard a -> a
+fromSuccess (Success a) = a
+fromSuccess _ = error "tried to unwrap a failure as a success"
