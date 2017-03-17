@@ -1,0 +1,86 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40231/th-desugar-1.6'
+Configuring th-desugar-1.6...
+Building th-desugar-1.6...
+Preprocessing library th-desugar-1.6...
+[1 of 8] Compiling Language.Haskell.TH.Desugar.Util ( Language/Haskell/TH/Desugar/Util.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Util.o )
+[2 of 8] Compiling Language.Haskell.TH.Desugar.Reify ( Language/Haskell/TH/Desugar/Reify.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Reify.o )
+[3 of 8] Compiling Language.Haskell.TH.Desugar.Core ( Language/Haskell/TH/Desugar/Core.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Core.o )
+[4 of 8] Compiling Language.Haskell.TH.Desugar.Match ( Language/Haskell/TH/Desugar/Match.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Match.o )
+[5 of 8] Compiling Language.Haskell.TH.Desugar.Sweeten ( Language/Haskell/TH/Desugar/Sweeten.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Sweeten.o )
+[6 of 8] Compiling Language.Haskell.TH.Desugar.Expand ( Language/Haskell/TH/Desugar/Expand.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Expand.o )
+[7 of 8] Compiling Language.Haskell.TH.Desugar ( Language/Haskell/TH/Desugar.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar.o )
+[8 of 8] Compiling Language.Haskell.TH.Desugar.Lift ( Language/Haskell/TH/Desugar/Lift.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Lift.o )
+[1 of 8] Compiling Language.Haskell.TH.Desugar.Util ( Language/Haskell/TH/Desugar/Util.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Util.p_o )
+[2 of 8] Compiling Language.Haskell.TH.Desugar.Reify ( Language/Haskell/TH/Desugar/Reify.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Reify.p_o )
+[3 of 8] Compiling Language.Haskell.TH.Desugar.Core ( Language/Haskell/TH/Desugar/Core.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Core.p_o )
+[4 of 8] Compiling Language.Haskell.TH.Desugar.Match ( Language/Haskell/TH/Desugar/Match.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Match.p_o )
+[5 of 8] Compiling Language.Haskell.TH.Desugar.Sweeten ( Language/Haskell/TH/Desugar/Sweeten.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Sweeten.p_o )
+[6 of 8] Compiling Language.Haskell.TH.Desugar.Expand ( Language/Haskell/TH/Desugar/Expand.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Expand.p_o )
+[7 of 8] Compiling Language.Haskell.TH.Desugar ( Language/Haskell/TH/Desugar.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar.p_o )
+[8 of 8] Compiling Language.Haskell.TH.Desugar.Lift ( Language/Haskell/TH/Desugar/Lift.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Desugar/Lift.p_o )
+Running Haddock for th-desugar-1.6...
+Preprocessing library th-desugar-1.6...
+Haddock coverage:
+  72% ( 21 / 29) in 'Language.Haskell.TH.Desugar.Util'
+  Missing documentation for:
+    Module header
+    mapMaybeM (Language/Haskell/TH/Desugar/Util.hs:250)
+    expectJustM (Language/Haskell/TH/Desugar/Util.hs:259)
+    thirdOf3 (Language/Haskell/TH/Desugar/Util.hs:237)
+    splitAtList (Language/Haskell/TH/Desugar/Util.hs:227)
+    freeNamesOfTypes (Language/Haskell/TH/Desugar/Util.hs:205)
+    thdOf3 (Language/Haskell/TH/Desugar/Util.hs:234)
+    firstMatch (Language/Haskell/TH/Desugar/Util.hs:263)
+  89% ( 17 / 19) in 'Language.Haskell.TH.Desugar.Reify'
+  Missing documentation for:
+    Module header
+    qReifyFixity
+  86% ( 70 / 81) in 'Language.Haskell.TH.Desugar.Core'
+  Missing documentation for:
+    Module header
+    DInstanceDec (Language/Haskell/TH/Desugar/Core.hs:233)
+    mk_tuple_stmt (Language/Haskell/TH/Desugar/Core.hs:517)
+    mk_tuple_pat (Language/Haskell/TH/Desugar/Core.hs:522)
+    fixBug8884ForFamilies (Language/Haskell/TH/Desugar/Core.hs:650)
+    fixBug8884ForInstances (Language/Haskell/TH/Desugar/Core.hs:682)
+    fixBug8884ForEqn (Language/Haskell/TH/Desugar/Core.hs:687)
+    mkExtraTvbs (Language/Haskell/TH/Desugar/Core.hs:800)
+    reorderFields (Language/Haskell/TH/Desugar/Core.hs:1095)
+    reorderFieldsPat (Language/Haskell/TH/Desugar/Core.hs:1098)
+    reorderFields' (Language/Haskell/TH/Desugar/Core.hs:1102)
+  67% (  2 /  3) in 'Language.Haskell.TH.Desugar.Match'
+  Missing documentation for:
+    Module header
+  12% (  2 / 16) in 'Language.Haskell.TH.Desugar.Sweeten'
+  Missing documentation for:
+    expToTH (Language/Haskell/TH/Desugar/Sweeten.hs:44)
+    matchToTH (Language/Haskell/TH/Desugar/Sweeten.hs:59)
+    patToTH (Language/Haskell/TH/Desugar/Sweeten.hs:62)
+    decsToTH (Language/Haskell/TH/Desugar/Sweeten.hs:70)
+    letDecToTH (Language/Haskell/TH/Desugar/Sweeten.hs:189)
+    typeToTH (Language/Haskell/TH/Desugar/Sweeten.hs:258)
+    conToTH (Language/Haskell/TH/Desugar/Sweeten.hs:195)
+    foreignToTH (Language/Haskell/TH/Desugar/Sweeten.hs:217)
+    pragmaToTH (Language/Haskell/TH/Desugar/Sweeten.hs:222)
+    ruleBndrToTH (Language/Haskell/TH/Desugar/Sweeten.hs:240)
+    clauseToTH (Language/Haskell/TH/Desugar/Sweeten.hs:255)
+    tvbToTH (Language/Haskell/TH/Desugar/Sweeten.hs:273)
+    cxtToTH (Language/Haskell/TH/Desugar/Sweeten.hs:277)
+    predToTH (Language/Haskell/TH/Desugar/Sweeten.hs:280)
+ 100% (  8 /  8) in 'Language.Haskell.TH.Desugar.Expand'
+  96% (107 /112) in 'Language.Haskell.TH.Desugar'
+  Missing documentation for:
+    Bang
+    SourceUnpackedness
+    SourceStrictness
+    DInstanceDec (Language/Haskell/TH/Desugar/Core.hs:233)
+    AnnTarget
+ 100% (  1 /  1) in 'Language.Haskell.TH.Desugar.Lift'
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/th-desugar/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-th-desugar-16780301931105222769.6
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/th-desugar-1.6-2fEbsYuBcmX4j8RnxBgfmZ
+Registering th-desugar-1.6...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40231/th-desugar-1.6'

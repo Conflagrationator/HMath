@@ -11,7 +11,7 @@ import Structure
 import Unit
 import Constraint.Addable
 import Constraint.Multipliable
-import Constraint.Powerable
+import Constraint.Radicalizable
 import Constraint.VectorSpace
 import Constraint.MeasureSpace
 import Constraint.InnerProductSpace
@@ -52,7 +52,13 @@ instance Multipliable Variable Variable Variable where
     multiply (Failure s) _ = Failure s
     multiply _ (Failure s) = Failure s
 
-instance Powerable Variable Variable Variable where
+instance Radicalizable Variable Variable Variable where
     power (Success (Variable a)) (Success (Variable b)) = Failure "attempting to evaluate a variable"
     power (Failure s) _ = Failure s
     power _ (Failure s) = Failure s
+    root (Success (Variable a)) (Success (Variable b)) = Failure "attempting to evaluate a variable"
+    root (Failure s) _ = Failure s
+    root _ (Failure s) = Failure s
+    logB (Success (Variable a)) (Success (Variable b)) = Failure "attempting to evaluate a variable"
+    logB (Failure s) _ = Failure s
+    logB _ (Failure s) = Failure s

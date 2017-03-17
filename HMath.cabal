@@ -54,11 +54,12 @@ library
                       Value.Number,
                       Value.Variable,
                       Value.Vector3D,
+                      Value.Vector,
                       Value.Matrix,
                       -- Default Constraints
                       Constraint.Addable,
                       Constraint.Multipliable,
-                      Constraint.Powerable,
+                      Constraint.Radicalizable,
                       Constraint.VectorSpace,
                       Constraint.MeasureSpace,
                       Constraint.InnerProductSpace,
@@ -73,11 +74,13 @@ library
                       FunctionalDependencies,
                       FlexibleInstances,
                       MultiParamTypeClasses,
-                      FlexibleContexts
+                      FlexibleContexts,
+                      DataKinds
   
   -- Other library packages from which modules are imported.
   build-depends:      base,
-                      megaparsec
+                      megaparsec,
+                      clash-prelude
   
   -- Directories containing source files.
   hs-source-dirs:     src

@@ -1,0 +1,21 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40241/th-expand-syns-0.4.2.0'
+Configuring th-expand-syns-0.4.2.0...
+Building th-expand-syns-0.4.2.0...
+Preprocessing library th-expand-syns-0.4.2.0...
+[1 of 1] Compiling Language.Haskell.TH.ExpandSyns ( Language/Haskell/TH/ExpandSyns.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/ExpandSyns.o )
+[1 of 1] Compiling Language.Haskell.TH.ExpandSyns ( Language/Haskell/TH/ExpandSyns.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/ExpandSyns.p_o )
+Running Haddock for th-expand-syns-0.4.2.0...
+Preprocessing library th-expand-syns-0.4.2.0...
+Haddock coverage:
+  82% (  9 / 11) in 'Language.Haskell.TH.ExpandSyns'
+  Missing documentation for:
+    Module header
+    SynonymExpansionSettings (Language/Haskell/TH/ExpandSyns.hs:76)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/th-expand-syns/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-th-expand-syns-0.4.21073185695316824712.0
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/th-expand-syns-0.4.2.0-U6wOpVMb055CNF6vvIqFu
+Registering th-expand-syns-0.4.2.0...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40241/th-expand-syns-0.4.2.0'

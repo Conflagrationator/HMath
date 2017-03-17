@@ -55,7 +55,7 @@ multiplyUnits a b = Unit {
     dollar = dollar a + dollar b}
 
 raiseUnit :: Unit -> Rational -> Maybe Unit
-raiseUnit u e = if length (catMaybes [m, kg, s, a, k, mol, cd, usd]) /= 7 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd, dollar = fromJust usd}
+raiseUnit u e = if length (catMaybes [m, kg, s, a, k, mol, cd, usd]) /= 8 then Nothing else Just $ Unit {meter = fromJust m, kilogram = fromJust kg, second = fromJust s, ampere = fromJust a, kelvin = fromJust k, mole = fromJust mol, candela = fromJust cd, dollar = fromJust usd}
   where
     castToInteger :: Rational -> Maybe Integer
     castToInteger n = if denominator n == 1 then Just (numerator n) else Nothing

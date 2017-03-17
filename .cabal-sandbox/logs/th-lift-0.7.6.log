@@ -1,0 +1,32 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40242/th-lift-0.7.6'
+Configuring th-lift-0.7.6...
+Building th-lift-0.7.6...
+Preprocessing library th-lift-0.7.6...
+[1 of 1] Compiling Language.Haskell.TH.Lift ( src/Language/Haskell/TH/Lift.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Lift.o )
+
+src/Language/Haskell/TH/Lift.hs:247:15: warning: [-Wname-shadowing]
+    This binding for ‘nameSpace’ shadows the existing binding
+      imported from ‘Language.Haskell.TH.Syntax’ at src/Language/Haskell/TH/Lift.hs:38:1-33
+[1 of 1] Compiling Language.Haskell.TH.Lift ( src/Language/Haskell/TH/Lift.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/Lift.p_o )
+
+src/Language/Haskell/TH/Lift.hs:247:15: warning: [-Wname-shadowing]
+    This binding for ‘nameSpace’ shadows the existing binding
+      imported from ‘Language.Haskell.TH.Syntax’ at src/Language/Haskell/TH/Lift.hs:38:1-33
+Running Haddock for th-lift-0.7.6...
+Preprocessing library th-lift-0.7.6...
+
+src/Language/Haskell/TH/Lift.hs:247:15: warning: [-Wname-shadowing]
+    This binding for ‘nameSpace’ shadows the existing binding
+      imported from ‘Language.Haskell.TH.Syntax’ at src/Language/Haskell/TH/Lift.hs:38:1-33
+Haddock coverage:
+  75% (  6 /  8) in 'Language.Haskell.TH.Lift'
+  Missing documentation for:
+    Module header
+    deriveLiftMany' (src/Language/Haskell/TH/Lift.hs:60)
+Documentation created: dist/dist-sandbox-a79a4d0f/doc/html/th-lift/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-th-lift-0.72111631616877819790.6
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/th-lift-0.7.6-BJcuQtn7dnPzL4YOk4wps
+Registering th-lift-0.7.6...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40242/th-lift-0.7.6'

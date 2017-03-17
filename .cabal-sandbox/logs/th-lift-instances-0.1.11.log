@@ -1,0 +1,20 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40236/th-lift-instances-0.1.11'
+Configuring th-lift-instances-0.1.11...
+Building th-lift-instances-0.1.11...
+Preprocessing library th-lift-instances-0.1.11...
+[1 of 1] Compiling Instances.TH.Lift ( src/Instances/TH/Lift.hs, dist/dist-sandbox-a79a4d0f/build/Instances/TH/Lift.o )
+[1 of 1] Compiling Instances.TH.Lift ( src/Instances/TH/Lift.hs, dist/dist-sandbox-a79a4d0f/build/Instances/TH/Lift.p_o )
+Running Haddock for th-lift-instances-0.1.11...
+Preprocessing library th-lift-instances-0.1.11...
+Haddock coverage:
+  92% ( 11 / 12) in 'Instances.TH.Lift'
+  Missing documentation for:
+    Module header
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/th-lift-instances/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-th-lift-instances-0.117371952722000755539.11
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/th-lift-instances-0.1.11-FhZsDN6phsO7Tsk1VM5ePg
+Registering th-lift-instances-0.1.11...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40236/th-lift-instances-0.1.11'

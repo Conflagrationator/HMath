@@ -14,7 +14,7 @@ import Value.Variable
 import Value.Vector3D
 import Constraint.Addable
 import Constraint.Multipliable
-import Constraint.Powerable
+import Constraint.Radicalizable
 import Constraint.VectorSpace
 import Constraint.MeasureSpace
 import Constraint.InnerProductSpace

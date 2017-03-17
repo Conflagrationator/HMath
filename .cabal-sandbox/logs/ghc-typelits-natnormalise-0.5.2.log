@@ -1,0 +1,32 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-29900/ghc-typelits-natnormalise-0.5.2'
+Configuring ghc-typelits-natnormalise-0.5.2...
+Building ghc-typelits-natnormalise-0.5.2...
+Preprocessing library ghc-typelits-natnormalise-0.5.2...
+[1 of 3] Compiling GHC.TypeLits.Normalise.SOP ( src/GHC/TypeLits/Normalise/SOP.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Normalise/SOP.o )
+[2 of 3] Compiling GHC.TypeLits.Normalise.Unify ( src/GHC/TypeLits/Normalise/Unify.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Normalise/Unify.o )
+[3 of 3] Compiling GHC.TypeLits.Normalise ( src/GHC/TypeLits/Normalise.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Normalise.o )
+[1 of 3] Compiling GHC.TypeLits.Normalise.SOP ( src/GHC/TypeLits/Normalise/SOP.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Normalise/SOP.p_o )
+[2 of 3] Compiling GHC.TypeLits.Normalise.Unify ( src/GHC/TypeLits/Normalise/Unify.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Normalise/Unify.p_o )
+[3 of 3] Compiling GHC.TypeLits.Normalise ( src/GHC/TypeLits/Normalise.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Normalise.p_o )
+Running Haddock for ghc-typelits-natnormalise-0.5.2...
+Preprocessing library ghc-typelits-natnormalise-0.5.2...
+Haddock coverage:
+  75% (  9 / 12) in 'GHC.TypeLits.Normalise.SOP'
+  Missing documentation for:
+    Symbol (src/GHC/TypeLits/Normalise/SOP.hs:97)
+    Product (src/GHC/TypeLits/Normalise/SOP.hs:104)
+    SOP (src/GHC/TypeLits/Normalise/SOP.hs:113)
+  84% ( 16 / 19) in 'GHC.TypeLits.Normalise.Unify'
+  Missing documentation for:
+    CType (src/GHC/TypeLits/Normalise/Unify.hs:67)
+    UnifyItem (src/GHC/TypeLits/Normalise/Unify.hs:172)
+    isNatural (src/GHC/TypeLits/Normalise/Unify.hs:453)
+ 100% (  2 /  2) in 'GHC.TypeLits.Normalise'
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/ghc-typelits-natnormalise/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-ghc-typelits-natnormalise-0.58965443031474833169.2
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/ghc-typelits-natnormalise-0.5.2-FfJm1UxS1ISGGBL7VH1fmG
+Registering ghc-typelits-natnormalise-0.5.2...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-29900/ghc-typelits-natnormalise-0.5.2'

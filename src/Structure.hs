@@ -32,8 +32,8 @@ class (Expression s s) => Value s
 data Guard a = Success a | Failure String -- TODO: put in Extensions
 
 instance (Show r) => Show (Guard r) where
-    show (Success a) = show a
-    show (Failure s) = s
+    show (Success a) = "[S:" ++ show a ++ "]"
+    show (Failure s) = "[F:" ++ s ++ "]"
 
 instance (Value r) => Expression (Guard r) r where
     evaluate (Success r) = Success r

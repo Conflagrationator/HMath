@@ -4,8 +4,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
-module Value.Matrix (Matrix (), matrix) where
+module Value.Matrix where
 
 ------------------------------------------------------------------------------
 
@@ -17,13 +21,27 @@ import Constraint.VectorSpace
 
 import Data.List
 import Data.Maybe
+import GHC.TypeLits
+import Data.Proxy
 
 ------------------------------------------------------------------------------
 -- | Matrix data type
 
-data Matrix r where
-    Matrix :: (Expression e r, Addable r r r, Multipliable Number r r, Multipliable r Number r, Multipliable r r r, VectorSpace r) => (Int, Int) -> [[e]] -> Matrix r
+data Matrix (m :: Nat) (n :: Nat) r where
+    Matrix :: [[r]] -> Matrix m n r
 
+--matrix :: Proxy n -> [[r]] -> Maybe (Matrix m n r)
+
+rows :: forall m n r. KnownNat m => Matrix n m r -> Int
+rows _ = fromIntegral $ natVal (Proxy :: Proxy m)
+
+cols :: forall m n r. KnownNat n => Matrix n m r -> Int
+cols _ = fromIntegral $ natVal (Proxy :: Proxy n)
+
+instance (KnownNat m, KnownNat n, Show r) => Show (Matrix m n r) where
+    show (Matrix r) = (show $ natVal (Proxy :: Proxy m)) ++ " " ++ (show $ natVal (Proxy :: Proxy n)) ++ " " ++ show r
+
+{-
 matrix :: (Expression e r, Addable r r r, Multipliable Number r r, Multipliable r Number r, Multipliable r r r, VectorSpace r) => (Int, Int) -> [[e]] -> Guard (Matrix r)
 matrix size list
     | sizeIsValid = Success $ Matrix size list
@@ -102,7 +120,7 @@ instance Multipliable (Matrix r) (Matrix r) (Matrix r) where
         new = map (\row -> map fromSuccess row) newGuarded
     multiply (Failure s) _ = Failure s
     multiply _ (Failure s) = Failure s
-
+-}
 -- instance VectorSpace (Matrix r) where -- TODO: encode size as part of type (see: "Type Arithmetic")
 --     zeroVector = 
 

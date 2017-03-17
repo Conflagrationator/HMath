@@ -1,0 +1,25 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/distributive-0.5.2'
+[1 of 1] Compiling Main             ( /var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/distributive-0.5.2/dist/dist-sandbox-a79a4d0f/setup/setup.hs, /var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/distributive-0.5.2/dist/dist-sandbox-a79a4d0f/setup/Main.o )
+Linking /var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/distributive-0.5.2/dist/dist-sandbox-a79a4d0f/setup/setup ...
+Configuring distributive-0.5.2...
+Building distributive-0.5.2...
+Preprocessing library distributive-0.5.2...
+[1 of 2] Compiling Data.Distributive ( src/Data/Distributive.hs, dist/dist-sandbox-a79a4d0f/build/Data/Distributive.o )
+[2 of 2] Compiling Data.Distributive.Generic ( src/Data/Distributive/Generic.hs, dist/dist-sandbox-a79a4d0f/build/Data/Distributive/Generic.o )
+[1 of 2] Compiling Data.Distributive ( src/Data/Distributive.hs, dist/dist-sandbox-a79a4d0f/build/Data/Distributive.p_o )
+[2 of 2] Compiling Data.Distributive.Generic ( src/Data/Distributive/Generic.hs, dist/dist-sandbox-a79a4d0f/build/Data/Distributive/Generic.p_o )
+Running Haddock for distributive-0.5.2...
+Preprocessing library distributive-0.5.2...
+Haddock coverage:
+ 100% (  5 /  5) in 'Data.Distributive'
+  75% (  3 /  4) in 'Data.Distributive.Generic'
+  Missing documentation for:
+    GDistributive (src/Data/Distributive/Generic.hs:51)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/distributive/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-distributive-0.5609352381936329094.2
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/distributive-0.5.2-LRMYhvYe7Cy30UvMv9KJ48
+Registering distributive-0.5.2...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/distributive-0.5.2'

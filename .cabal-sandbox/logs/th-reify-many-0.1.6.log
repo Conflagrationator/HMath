@@ -1,0 +1,38 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40235/th-reify-many-0.1.6'
+Configuring th-reify-many-0.1.6...
+Building th-reify-many-0.1.6...
+Preprocessing library th-reify-many-0.1.6...
+[1 of 2] Compiling Language.Haskell.TH.ReifyMany.Internal ( src/Language/Haskell/TH/ReifyMany/Internal.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/ReifyMany/Internal.o )
+[2 of 2] Compiling Language.Haskell.TH.ReifyMany ( src/Language/Haskell/TH/ReifyMany.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/ReifyMany.o )
+
+src/Language/Haskell/TH/ReifyMany.hs:100:17: warning: [-Wdeprecations]
+    In the use of ‘report’
+    (imported from Language.Haskell.TH, but defined in Language.Haskell.TH.Syntax):
+    Deprecated: "Use reportError or reportWarning instead"
+[1 of 2] Compiling Language.Haskell.TH.ReifyMany.Internal ( src/Language/Haskell/TH/ReifyMany/Internal.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/ReifyMany/Internal.p_o )
+[2 of 2] Compiling Language.Haskell.TH.ReifyMany ( src/Language/Haskell/TH/ReifyMany.hs, dist/dist-sandbox-a79a4d0f/build/Language/Haskell/TH/ReifyMany.p_o )
+
+src/Language/Haskell/TH/ReifyMany.hs:100:17: warning: [-Wdeprecations]
+    In the use of ‘report’
+    (imported from Language.Haskell.TH, but defined in Language.Haskell.TH.Syntax):
+    Deprecated: "Use reportError or reportWarning instead"
+Running Haddock for th-reify-many-0.1.6...
+Preprocessing library th-reify-many-0.1.6...
+
+src/Language/Haskell/TH/ReifyMany.hs:100:17: warning: [-Wdeprecations]
+    In the use of ‘report’
+    (imported from Language.Haskell.TH, but defined in Language.Haskell.TH.Syntax):
+    Deprecated: "Use reportError or reportWarning instead"
+Haddock coverage:
+  92% ( 11 / 12) in 'Language.Haskell.TH.ReifyMany.Internal'
+  Missing documentation for:
+    Module header
+ 100% (  4 /  4) in 'Language.Haskell.TH.ReifyMany'
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/th-reify-many/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-th-reify-many-0.1750597385971307217.6
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/th-reify-many-0.1.6-CRrzZXh2Vc23s8liUkpbPi
+Registering th-reify-many-0.1.6...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40235/th-reify-many-0.1.6'

@@ -1,0 +1,49 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/ghc-typelits-extra-0.2.2'
+Configuring ghc-typelits-extra-0.2.2...
+Building ghc-typelits-extra-0.2.2...
+Preprocessing library ghc-typelits-extra-0.2.2...
+[1 of 4] Compiling GHC.TypeLits.Extra.Solver.Operations ( src/GHC/TypeLits/Extra/Solver/Operations.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra/Solver/Operations.o )
+[2 of 4] Compiling GHC.TypeLits.Extra.Solver.Unify ( src/GHC/TypeLits/Extra/Solver/Unify.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra/Solver/Unify.o )
+[3 of 4] Compiling GHC.TypeLits.Extra.Solver ( src/GHC/TypeLits/Extra/Solver.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra/Solver.o )
+[4 of 4] Compiling GHC.TypeLits.Extra ( src/GHC/TypeLits/Extra.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra.o )
+[1 of 4] Compiling GHC.TypeLits.Extra.Solver.Operations ( src/GHC/TypeLits/Extra/Solver/Operations.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra/Solver/Operations.p_o )
+[2 of 4] Compiling GHC.TypeLits.Extra.Solver.Unify ( src/GHC/TypeLits/Extra/Solver/Unify.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra/Solver/Unify.p_o )
+[3 of 4] Compiling GHC.TypeLits.Extra.Solver ( src/GHC/TypeLits/Extra/Solver.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra/Solver.p_o )
+[4 of 4] Compiling GHC.TypeLits.Extra ( src/GHC/TypeLits/Extra.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/Extra.p_o )
+Running Haddock for ghc-typelits-extra-0.2.2...
+Preprocessing library ghc-typelits-extra-0.2.2...
+Haddock coverage:
+   7% (  1 / 14) in 'GHC.TypeLits.Extra.Solver.Operations'
+  Missing documentation for:
+    ExtraOp (src/GHC/TypeLits/Extra/Solver/Operations.hs:38)
+    ExtraDefs (src/GHC/TypeLits/Extra/Solver/Operations.hs:69)
+    reifyEOP (src/GHC/TypeLits/Extra/Solver/Operations.hs:81)
+    mergeMax (src/GHC/TypeLits/Extra/Solver/Operations.hs:106)
+    mergeMin (src/GHC/TypeLits/Extra/Solver/Operations.hs:116)
+    mergeDiv (src/GHC/TypeLits/Extra/Solver/Operations.hs:126)
+    mergeMod (src/GHC/TypeLits/Extra/Solver/Operations.hs:131)
+    mergeFLog (src/GHC/TypeLits/Extra/Solver/Operations.hs:136)
+    mergeCLog (src/GHC/TypeLits/Extra/Solver/Operations.hs:142)
+    mergeLog (src/GHC/TypeLits/Extra/Solver/Operations.hs:148)
+    mergeGCD (src/GHC/TypeLits/Extra/Solver/Operations.hs:154)
+    mergeLCM (src/GHC/TypeLits/Extra/Solver/Operations.hs:158)
+    mergeExp (src/GHC/TypeLits/Extra/Solver/Operations.hs:162)
+  40% (  2 /  5) in 'GHC.TypeLits.Extra.Solver.Unify'
+  Missing documentation for:
+    ExtraDefs (src/GHC/TypeLits/Extra/Solver/Operations.hs:69)
+    normaliseNat (src/GHC/TypeLits/Extra/Solver/Unify.hs:33)
+    unifyExtra (src/GHC/TypeLits/Extra/Solver/Unify.hs:85)
+ 100% (  2 /  2) in 'GHC.TypeLits.Extra.Solver'
+ 100% ( 18 / 18) in 'GHC.TypeLits.Extra'
+Warning: GHC.TypeLits.Extra.Solver: could not find link destinations for:
+    Div Mod FLog CLog Log GCD LCM
+Warning: GHC.TypeLits.Extra: could not find link destinations for:
+    ~
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/ghc-typelits-extra/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-ghc-typelits-extra-0.22121578553552265483.2
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/ghc-typelits-extra-0.2.2-8Q4ilshxMq15SzZIkhnw3k
+Registering ghc-typelits-extra-0.2.2...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/ghc-typelits-extra-0.2.2'

@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>CLaSH.NamedTypes</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_CLaSH-NamedTypes.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">clash-prelude-0.11: CAES Language for Synchronous Hardware - Prelude library</p></div><div id="content"><div id="module-header"><table class="info"><tr><th valign="top">Copyright</th><td>(C) 2017 QBayLogic</td></tr><tr><th>License</th><td>BSD2 (see the file LICENSE)</td></tr><tr><th>Maintainer</th><td>Christiaan Baaij &lt;christiaan.baaij@gmail.com&gt;</td></tr><tr><th>Safe Haskell</th><td>Safe</td></tr><tr><th>Language</th><td>Haskell2010</td></tr><tr><th>Extensions</th><td><ul class="extension-list"><li>PolyKinds</li><li>KindSignatures</li><li>TypeOperators</li><li>ExplicitNamespaces</li></ul></td></tr></table><p class="caption">CLaSH.NamedTypes</p></div><div id="description"><p class="caption">Description</p><div class="doc"><p>Add inline documentation to types:</p><pre>fifo
+  :: SClock clk
+  -&gt; SNat addrSize
+  -&gt; &quot;read request&quot; ::: Signal' clk Bool
+  -&gt; &quot;write request&quot; ::: Signal' clk (Maybe (BitVector dataSize))
+  -&gt; ( &quot;q&quot;     ::: Signal' clk (BitVector dataSize)
+     , &quot;full&quot;  ::: Signal' clk Bool
+     , &quot;empty&quot; ::: Signal' clk Bool
+     )
+</pre><p>which can subsequently be inspected in the interactive environment:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t fifo systemClock
+</code></strong>fifo systemClock
+  :: SNat addrSize
+     -&gt; &quot;read request&quot; ::: Signal' SystemClock Bool
+     -&gt; &quot;write request&quot;
+        ::: Signal' SystemClock (Maybe (BitVector dataSize))
+     -&gt; (&quot;q&quot; ::: Signal' SystemClock (BitVector dataSize),
+         &quot;full&quot; ::: Signal' SystemClock Bool,
+         &quot;empty&quot; ::: Signal' SystemClock Bool)
+</pre></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><span class="keyword">type</span> <a href="#t::::">(:::)</a> name a = a</li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><span class="keyword">type</span> <a id="t::::" class="def">(:::)</a> name a = a <a href="#t::::" class="selflink">#</a></p><div class="doc"><p>Annotate a type with a name</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.17.3</p></div></body></html>
