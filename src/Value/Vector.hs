@@ -3,9 +3,9 @@
 
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleInstances #-}
 
 module Value.Vector where -- TODO: block export of Vec & manipulation operations
 
@@ -24,6 +24,7 @@ import Constraint.InnerProductSpace
 import GHC.TypeLits
 import CLaSH.Sized.Vector as V
 import Prelude as P
+import Data.List
 
 ------------------------------------------------------------------------------
 -- | Vector data type
@@ -43,7 +44,9 @@ instance Value (Vector n r)
 -- ALL EXPRESSIONS MUST BE SHOWABLE
 
 instance Show (Vector n r) where
-    show (Vector vec) = show vec
+    show (Vector vec) = "(:" P.++ showVecInternals vec P.++ ":)"
+      where
+        showVecInternals v = intercalate ", " (P.map show (toList v))
 
 ------------------------------------------------------------------------------
 -- CONSTRAINT & OPERATOR IMPLEMENTATION
@@ -111,10 +114,10 @@ instance Expression (CrossProduct r) (Vector 3 r) where
 instance Show (CrossProduct r) where
     show (CrossProduct a b) = "(" P.++ show a P.++ "×" P.++ show b P.++ ")"
 
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- UTILITY FUNCTIONS
 
-unwrapGuardedVec :: Vec n (Guard a) -> Guard (Vec n a)
+unwrapGuardedVec :: Vec n (Guard a) -> Guard (Vec n a) -- FIXME: find a clean way of removing this code duplication
 unwrapGuardedVec vec = if all hasSucceeded vecAsList then Success (V.map fromSuccess vec) else Failure "not all components of vector were able to be evaluated"
   where
     vecAsList = toList vec

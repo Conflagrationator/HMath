@@ -6,8 +6,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 module Value.Matrix where
 
@@ -15,116 +13,97 @@ module Value.Matrix where
 
 import Structure
 import Value.Number
+import Value.Vector
 import Constraint.Addable
 import Constraint.Multipliable
 import Constraint.VectorSpace
 
-import Data.List
-import Data.Maybe
 import GHC.TypeLits
-import Data.Proxy
+import CLaSH.Sized.Vector as V
+import Prelude as P
+import Data.List
 
 ------------------------------------------------------------------------------
 -- | Matrix data type
 
 data Matrix (m :: Nat) (n :: Nat) r where
-    Matrix :: [[r]] -> Matrix m n r
-
---matrix :: Proxy n -> [[r]] -> Maybe (Matrix m n r)
-
-rows :: forall m n r. KnownNat m => Matrix n m r -> Int
-rows _ = fromIntegral $ natVal (Proxy :: Proxy m)
-
-cols :: forall m n r. KnownNat n => Matrix n m r -> Int
-cols _ = fromIntegral $ natVal (Proxy :: Proxy n)
-
-instance (KnownNat m, KnownNat n, Show r) => Show (Matrix m n r) where
-    show (Matrix r) = (show $ natVal (Proxy :: Proxy m)) ++ " " ++ (show $ natVal (Proxy :: Proxy n)) ++ " " ++ show r
-
-{-
-matrix :: (Expression e r, Addable r r r, Multipliable Number r r, Multipliable r Number r, Multipliable r r r, VectorSpace r) => (Int, Int) -> [[e]] -> Guard (Matrix r)
-matrix size list
-    | sizeIsValid = Success $ Matrix size list
-    | otherwise = Failure "Matrix dimensions do not agree"
-  where
-    sizeIsValid = length list == fst size && all (== snd size) (map length list)
-
-rows :: Matrix r -> Int
-rows (Matrix s _) = fst s
-
-cols :: Matrix r -> Int
-cols (Matrix s _) = snd s
-
--- getRow :: Expression e r => Int -> Matrix r -> Maybe [e]
--- getRow n m@(Matrix s a) = if 0 <= n && n <= rows m then Just (a !! n) else Nothing
--- 
--- getCol :: Expression e r => Int -> Matrix r -> Maybe [e]
--- getCol n m@(Matrix s a) = if 0 <= n && n <= cols m then Just (map (!! n) a) else Nothing
-
--- dot :: (Value r, VectorSpace r) => [r] -> [r] -> Guard r
--- dot a b = foldr (Success zeroVector) add (zipWith multiply (map evaluate a) (map evaluate b))
+    Matrix :: (Expression e r, VectorSpace r) => Vec m (Vec n e) -> Matrix m n r
 
 ------------------------------------------------------------------------------
 -- ALL MATRICES ARE VALUES
 -- ALL VALUES ARE EXPRESSIONS THAT EVALUATE TO THEMSELVES
 
-instance Expression (Matrix r) (Matrix r) where
+instance Expression (Matrix m n r) (Matrix m n r) where
     evaluate a = Success a
 
-instance Value (Matrix r)
+instance Value (Matrix m n r)
 
 -- ALL EXPRESSIONS MUST BE SHOWABLE
 
-instance Show (Matrix r) where
-    show (Matrix _ l) = show l
+instance Show (Matrix m n r) where
+    show (Matrix rows) = "[" P.++ (intercalate ", " (P.map (\col -> "[" P.++ (intercalate ", " (P.map show (toList col))) P.++ "]") (toList rows))) P.++ "]"
 
 ------------------------------------------------------------------------------
 -- CONSTRAINT & OPERATOR IMPLEMENTATION
 
--- | Vector addition
-instance Addable (Matrix r) (Matrix r) (Matrix r) where
-    add (Success (Matrix s a)) (Success (Matrix z b))
-        | s == z && all (all hasSucceeded) newGuarded = Success $ Matrix s new
-        | not $ all (all hasSucceeded) newGuarded = Failure "not all the sub-operations evaluated successfully"
-        | otherwise = Failure "trying to add matrices with non-matching dimensions"
+-- | Matrix Addition
+instance Addable (Matrix m n r) (Matrix m n r) (Matrix m n r) where
+    add (Success (Matrix a)) (Success (Matrix b)) = if hasSucceeded c then Success (Matrix (fromSuccess c)) else Failure (failureMessage c)
       where
-        newGuarded = zipWith (\ra rb -> zipWith add (map evaluate ra) (map evaluate rb)) a b
-        new = map (\row -> map fromSuccess row) newGuarded
+        c = unwrapGuardedVec $ V.map (\row -> unwrapGuardedVec row) $ v -- unwrap the Guards to the outside
+        v = V.zipWith (\ra rb -> V.zipWith add (V.map evaluate ra) (V.map evaluate rb)) a b
     add (Failure s) _ = Failure s
     add _ (Failure s) = Failure s
 
 -- | Matrix Scalar Multiplication
-instance Multipliable Number (Matrix r) (Matrix r) where
-    multiply (Success au@(Measure a u)) (Success (Matrix z b)) = Success $ Matrix z new
+instance Multipliable Number (Matrix m n r) (Matrix m n r) where
+    multiply (Success a) (Success (Matrix b)) = if hasSucceeded c then Success (Matrix (fromSuccess c)) else Failure (failureMessage c)
       where
-        new = map (\row -> map (\item -> multiply (evaluate au) (evaluate item)) row) b
+        c = unwrapGuardedVec $ V.map (\row -> unwrapGuardedVec row) $ v -- unwrap the Guards to the outside
+        v = V.map (\row -> V.map (multiply (Success a)) (V.map evaluate row)) b
     multiply (Failure s) _ = Failure s
     multiply _ (Failure s) = Failure s
 
--- | Matrix Scalar Multiplication (commutative)
-instance Multipliable (Matrix r) Number (Matrix r) where
-    multiply (Success (Matrix s a)) (Success bv@(Measure b v)) = Success $ Matrix s new
-      where
-        new = map (\row -> map (\item -> multiply (evaluate item) (evaluate bv)) row) a
-    multiply (Failure s) _ = Failure s
-    multiply _ (Failure s) = Failure s
+-- | Matrix Scalar Multiplication
+instance Multipliable (Matrix m n r) Number (Matrix m n r) where
+    multiply a b = multiply b a
 
+-- | Matrix is a Vector Space
+instance (KnownNat m, KnownNat n, VectorSpace r) => VectorSpace (Matrix m n r) where
+    zeroVector = Matrix $ V.repeat (V.repeat zeroVector)
+    negateVector (Success (Matrix a)) = if hasSucceeded c then Success (Matrix (fromSuccess c)) else Failure (failureMessage c)
+      where
+        c = unwrapGuardedVec $ V.map (\row -> unwrapGuardedVec row) $ v -- unwrap the Guards to the outside
+        v = V.map (\row -> V.map negateVector (V.map evaluate row)) a
+    negateVector (Failure s) = Failure s
+
+-- SPECIFIC MATRIX TYPE INSTANCES
 
 -- | Matrix Multiplication
-instance Multipliable (Matrix r) (Matrix r) (Matrix r) where
-    multiply (Success ma@(Matrix s a)) (Success mb@(Matrix z b))
-        | cols ma == rows mb && all (all hasSucceeded) newGuarded = Success $ Matrix (rows ma, cols mb) new
-        | otherwise = Failure "trying to multiply matrices with non-matching dimensions (m⨯n * n⨯k = m⨯k)"
-      where
-        newGuarded = [[foldr add (Success zeroVector) (zipWith multiply (map evaluate ar) (map evaluate bc)) | bc <- transpose b] | ar <- a]
-        new = map (\row -> map fromSuccess row) newGuarded
-    multiply (Failure s) _ = Failure s
-    multiply _ (Failure s) = Failure s
--}
--- instance VectorSpace (Matrix r) where -- TODO: encode size as part of type (see: "Type Arithmetic")
---     zeroVector = 
+-- instance Multipliable (Matrix m n r) (Matrix n k r) (Matrix m k r) where -- TODO: make (Multipliable a b c, Addable c c d) a constraint, unless of course it doesn't make sense
+--     multiply (Success ma@(Matrix a)) mb@(Success (Matrix b)) = 
+--     multiply (Failure s) _ = Failure s
+--     multiply _ (Failure s) = Failure s
 
-{-
-a = Matrix (2, 2) [[Measure 1 unitless, Measure 2 unitless], [Measure 3 unitless, Measure 4 unitless]]
-b = Matrix (2, 2) [[Measure 2 unitless, Measure 2 unitless], [Measure 8 unitless, Measure 8 unitless]]
--}
+-- SPECIFIC VECTOR TYPE OPERATORS
+
+-- TODO: finish Transpose to make Multiplication possible
+-- data Transpose m n r where
+--     Transpose :: Matrix m n r -> Transpose m n r
+
+-- all operators are expressions
+-- instance Expression (Transpose m n r) (Matrix n m r) where
+--     evaluate (Transpose Nil) = Success Nil
+--     evaluate (Transpose a) = Success $ (V.map V.head a) :> fromSuccess (evaluate (Transpose (V.map V.tail a)))
+
+-- all expressions are showable
+-- instance Show (Transpose m n r) where
+--     show (Transpose a) = "(" P.++ show a P.++ "^T)"
+
+--------------------------------------------------------------------------------
+-- UTILITY FUNCTIONS
+
+-- transposeVec :: Vec m (Vec n r) -> Vec n (Vec m r)
+-- transposeVec Nil = Nil
+-- transposeVec x = (V.map V.head x) :> (transposeVec (V.map V.tail x))
+-- transposeVec (x :> xs) =  -- TODO: use "generateI"
