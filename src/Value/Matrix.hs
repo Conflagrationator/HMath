@@ -80,30 +80,26 @@ instance (KnownNat m, KnownNat n, VectorSpace r) => VectorSpace (Matrix m n r) w
 -- SPECIFIC MATRIX TYPE INSTANCES
 
 -- | Matrix Multiplication
--- instance Multipliable (Matrix m n r) (Matrix n k r) (Matrix m k r) where -- TODO: make (Multipliable a b c, Addable c c d) a constraint, unless of course it doesn't make sense
---     multiply (Success ma@(Matrix a)) mb@(Success (Matrix b)) = 
---     multiply (Failure s) _ = Failure s
---     multiply _ (Failure s) = Failure s
+instance (KnownNat m, KnownNat n, KnownNat k, Multipliable r r r) => Multipliable (Matrix m n r) (Matrix n k r) (Matrix m k r) where
+    multiply (Success (Matrix a)) (Success (Matrix b)) = if hasSucceeded v then Success (Matrix (fromSuccess v)) else Failure $ failureMessage v
+      where
+        b' = V.transpose b
+        dot j k = V.foldr add (Success zeroVector) $ V.zipWith multiply (V.map evaluate j) (V.map evaluate k)
+        v = unwrapGuardedVec $ V.map (\r -> unwrapGuardedVec $ V.map (dot r) b') a
+    multiply (Failure s) _ = Failure s
+    multiply _ (Failure s) = Failure s
 
 -- SPECIFIC VECTOR TYPE OPERATORS
 
--- TODO: finish Transpose to make Multiplication possible
--- data Transpose m n r where
---     Transpose :: Matrix m n r -> Transpose m n r
+-- | Transpose Operator
+data Transpose m n r where
+    Transpose :: Matrix m n r -> Transpose m n r
 
--- all operators are expressions
--- instance Expression (Transpose m n r) (Matrix n m r) where
---     evaluate (Transpose Nil) = Success Nil
---     evaluate (Transpose a) = Success $ (V.map V.head a) :> fromSuccess (evaluate (Transpose (V.map V.tail a)))
+-- | all operators are expressions
+instance (KnownNat m, KnownNat n) => Expression (Transpose m n r) (Matrix n m r) where
+    --evaluate (Transpose Nil) = Success Nil
+    evaluate (Transpose (Matrix vec)) = Success $ Matrix (V.transpose vec)
 
--- all expressions are showable
--- instance Show (Transpose m n r) where
---     show (Transpose a) = "(" P.++ show a P.++ "^T)"
-
---------------------------------------------------------------------------------
--- UTILITY FUNCTIONS
-
--- transposeVec :: Vec m (Vec n r) -> Vec n (Vec m r)
--- transposeVec Nil = Nil
--- transposeVec x = (V.map V.head x) :> (transposeVec (V.map V.tail x))
--- transposeVec (x :> xs) =  -- TODO: use "generateI"
+-- | all expressions are showable
+instance Show (Transpose m n r) where
+    show (Transpose a) = "(" P.++ show a P.++ "^T)"

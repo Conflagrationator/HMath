@@ -117,7 +117,7 @@ instance Show (CrossProduct r) where
 --------------------------------------------------------------------------------
 -- UTILITY FUNCTIONS
 
-unwrapGuardedVec :: Vec n (Guard a) -> Guard (Vec n a) -- FIXME: find a clean way of removing this code duplication
+unwrapGuardedVec :: Vec n (Guard a) -> Guard (Vec n a) -- FIXME: find a better place to put this so Matrix doesn't have to import Vector, unless I'll use it there
 unwrapGuardedVec vec = if all hasSucceeded vecAsList then Success (V.map fromSuccess vec) else Failure "not all components of vector were able to be evaluated"
   where
     vecAsList = toList vec
