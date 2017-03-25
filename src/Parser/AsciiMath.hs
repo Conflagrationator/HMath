@@ -11,7 +11,6 @@ import Structure
 import Unit
 import Value.Number
 import Value.Variable
-import Value.Vector3D
 import Constraint.Addable
 import Constraint.Multipliable
 import Constraint.Radicalizable
