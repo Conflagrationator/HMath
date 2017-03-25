@@ -1,0 +1,1040 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>CLaSH.Tutorial</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_CLaSH-Tutorial.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">clash-prelude-0.11: CAES Language for Synchronous Hardware - Prelude library</p></div><div id="content"><div id="module-header"><table class="info"><tr><th valign="top">Copyright</th><td>&#169; 2014-2016 Christiaan Baaij 2017 QBayLogic</td></tr><tr><th>License</th><td>Creative Commons 4.0 (CC BY 4.0) (http://creativecommons.org/licenses/by/4.0/)</td></tr><tr><th>Safe Haskell</th><td>None</td></tr><tr><th>Language</th><td>Haskell2010</td></tr></table><p class="caption">CLaSH.Tutorial</p></div><div id="table-of-contents"><p class="caption">Contents</p><ul><li><a href="#g:1">Introduction</a></li><li><a href="#g:2">Installation</a></li><li><a href="#g:3">Working with this tutorial</a></li><li><a href="#g:4">Your first circuit</a><ul><li><a href="#g:5">Sequential circuit</a></li><li><a href="#g:6">Generating VHDL</a></li><li><a href="#g:7">Circuit testbench</a></li><li><a href="#g:8">Generating Verilog and SystemVerilog</a></li><li><a href="#g:9">Alternative specifications</a></li></ul></li><li><a href="#g:10">Higher-order functions</a></li><li><a href="#g:11">Composition of sequential circuits</a></li><li><a href="#g:12">TopEntity annotations: controlling the VHDL/(System)Verilog generation.</a></li><li><a href="#g:13">Multiple clock domains</a></li><li><a href="#g:14">Advanced: Primitives</a><ul><li><a href="#g:15">Verilog primitives</a></li><li><a href="#g:16">SystemVerilog primitives</a></li></ul></li><li><a href="#g:17">Conclusion</a></li><li><a href="#g:18">Troubleshooting</a></li><li><a href="#g:19">Limitations of C&#955;aSH</a></li><li><a href="#g:20">C&#955;aSH vs Lava</a></li></ul></div><div id="description"><p class="caption">Description</p><div class="doc empty">&nbsp;</div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"></ul></div><div id="interface"><h1 id="g:1">Introduction</h1><div class="doc"><p>C&#955;aSH (pronounced &#8216;clash&#8217;) is a functional hardware description language that
+borrows both its syntax and semantics from the functional programming language
+Haskell. It provides a familiar structural design approach to both combination
+and synchronous sequential circuits. The C&#955;aSH compiler transforms these
+high-level descriptions to low-level synthesizable VHDL, Verilog, or
+SystemVerilog.</p><p>Features of C&#955;aSH:</p><ul><li>Strongly typed, but with a very high degree of type inference, enabling
+    both safe and fast prototyping using concise descriptions.</li><li>Interactive REPL: load your designs in an interpreter and easily test all
+    your component without needing to setup a test bench.</li><li>Compile your designs for fast simulation.</li><li>Higher-order functions, in combination with type inference, result in
+    designs that are fully parametric by default.</li><li>Synchronous sequential circuit design based on streams of values, called
+    <code>Signal</code>s, lead to natural descriptions of feedback loops.</li><li>Multiple clock domains, with type safe clock domain crossing.</li><li>Template language for introducing new VHDL/(System)Verilog primitives.</li></ul><p>Although we say that C&#955;aSH borrows the semantics of Haskell, that statement
+should be taken with a grain of salt. What we mean to say is that the C&#955;aSH
+compiler views a circuit description as <em>structural</em> description. This means,
+in an academic handwavy way, that every function denotes a component and every
+function application denotes an instantiation of said component. Now, this has
+consequences on how we view <em>recursively</em> defined functions: structurally, a
+recursively defined function would denote an <em>infinitely</em> deep / structured
+component, something that cannot be turned into an actual circuit
+(See also <a href="#limitations">Limitations of C&#955;aSH</a>).</p><p>On the other hand, Haskell's by-default non-strict evaluation works very well
+for the simulation of the feedback loops, which are ubiquitous in digital
+circuits. That is, when we take our structural view to circuit descriptions,
+value-recursion corresponds directly to a feedback loop:</p><pre>counter = s
+  where
+    s = <code><a href="CLaSH-Signal.html#v:register">register</a></code> 0 (s + 1)
+</pre><p>The above definition, which uses value-recursion, <em>can</em> be synthesized to a
+circuit by the C&#955;aSH compiler.</p><p>Over time, you will get a better feeling for the consequences of taking a
+<em>structural</em> view on circuit descriptions. What is always important to
+remember is that every applied functions results in an instantiated component,
+and also that the compiler will <em>never</em> infer / invent more logic than what is
+specified in the circuit description.</p><p>With that out of the way, let us continue with installing C&#955;aSH and building
+our first circuit.</p></div><h1 id="g:2">Installation</h1><div class="doc"><p>The C&#955;aSH compiler and Prelude library for circuit design only work with the
+<a href="http://haskell.org/ghc">GHC</a> Haskell compiler version 8.0 (lower versions of
+GHC are not supported).</p><ol><li><p>Install <strong>GHC 8.0</strong></p><ul><li>Download and install <a href="https://www.haskell.org/ghc/download_ghc_8_0_2">GHC for your platform</a>.
+  Unix user can use <code>./configure prefix=&lt;LOCATION&gt;</code> to set the installation
+  location.</li><li>Make sure that the <code>bin</code> directory of <strong>GHC</strong> is in your <code>PATH</code>.</li></ul></li></ol><p>In case you cannot find what you are looking for on <a href="https://www.haskell.org/ghc/download_ghc_8_0_2">https://www.haskell.org/ghc/download_ghc_8_0_2</a>,
+    you can, <em>alternatively</em>, use the following instructions:</p><ul><li><p>Ubuntu:</p><ul><li>Run: <code>sudo add-apt-repository -y ppa:hvr/ghc</code></li><li>Run: <code>sudo apt-get update</code></li><li>Run: <code>sudo apt-get install cabal-install-1.24 ghc-8.0.2 libtinfo-dev</code></li><li>Update your <code>PATH</code> with: <code>/opt/ghc/8.0.2/bin</code>, <code>/opt/cabal/1.24/bin</code>, and <code>$HOME/.cabal/bin</code></li><li>Run: <code>cabal update</code></li><li>Skip step 2.</li></ul></li><li><p>OS X:</p><ul><li>Follow the instructions on: <a href="https://www.haskell.org/platform/mac.html">Haskell Platform Mac OS X</a>
+  to install the <em>minimal</em> Haskell platform</li><li>Run: <code>cabal update</code></li><li>Skip step 2.</li></ul></li><li><p>Windows:</p><ul><li>Follow the instructions on: <a href="https://www.haskell.org/platform/windows.html">Haskell Platform Windows</a>
+  to install the <em>minimal</em> Haskell platform</li><li>Run: <code>cabal update</code></li><li>Skip step 2.</li></ul></li></ul><ol><li><p>Install <strong>Cabal (version 1.24 or higher)</strong></p><ul><li><p>Binary, when available:</p><ul><li>Download the binary for <a href="http://www.haskell.org/cabal/download.html">cabal-install</a></li><li>Put the binary in a location mentioned in your <code>PATH</code></li><li><p>Add <code>cabal</code>'s <code>bin</code> directory to your <code>PATH</code>:</p><ul><li>Windows: <code>%appdata%\cabal\bin</code></li><li>Unix: <code>$HOME/.cabal/bin</code></li></ul></li></ul></li><li><p>Source:</p><ul><li>Download the sources for <a href="http://hackage.haskell.org/package/cabal-install">cabal-install</a></li><li>Unpack (<code>tar xf</code>) the archive and <code>cd</code> to the directory</li><li>Run: <code>sh bootstrap.sh</code></li><li>Follow the instructions to add <code>cabal</code> to your <code>PATH</code></li></ul></li><li>Run <code>cabal update</code></li></ul></li><li><p>Install <strong>C&#955;aSH</strong></p><ul><li><p>Run:</p><ul><li><em>i386</em> Linux: <code>cabal install clash-ghc --enable-documentation --enable-executable-dynamic</code></li><li>Other: <code>cabal install clash-ghc --enable-documentation</code></li></ul></li><li><em>This is going to take awhile, so have a refreshment</em></li></ul></li><li><p>Verify that everything is working by:</p><ul><li>Downloading the <a href="https://raw.githubusercontent.com/clash-lang/clash-compiler/049e6e2eacb9b3b5ae8664b9b79979c321b322d9/examples/FIR.hs">Fir.hs</a> example</li><li>Run: <code>clash --interactive FIR.hs</code></li><li>Execute, in the interpreter, the <code>:vhdl</code> command</li><li>Execute, in the interpreter, the <code>:verilog</code> command</li><li>Execute, in the interpreter, the <code>:systemverilog</code> command</li><li>Exit the interpreter using <code>:q</code></li><li>Examine the VHDL code in the <code>vhdl</code> directory</li><li>Examine the Verilog code in the <code>verilog</code> directory</li><li>Examine the SystemVerilog code in the <code>systemverilog</code> directory</li></ul></li></ol></div><h1 id="g:3">Working with this tutorial</h1><div class="doc"><p>This tutorial can be followed best whilst having the C&#955;aSH interpreter running
+at the same time. If you followed the installation instructions, you already
+know how to start the C&#955;aSH compiler in interpretive mode:</p><pre>clash --interactive
+</pre><p>For those familiar with Haskell/GHC, this is indeed just <code>GHCi</code>, with three
+added commands (<code>:vhdl</code>, <code>:verilog</code>, and <code>:systemverilog</code>). You can load files
+into the interpreter using the <code>:l &lt;FILENAME&gt;</code> command. Now, depending on your
+choice in editor, the following <code>edit-load-run</code> cycle probably work best for you:</p><ul><li><p><strong>Commandline (e.g. emacs, vim):</strong></p><ul><li>You can run system commands using <code>:!</code>, for example <code>:! touch &lt;FILENAME&gt;</code></li><li>Set the <em>editor</em> mode to your favourite editor using: <code>:set editor &lt;EDITOR&gt;</code></li><li>You can load files using <code>:l</code> as noted above.</li><li>You can go into <em>editor</em> mode using: <code>:e</code></li><li>Leave the editor mode by quitting the editor (e.g. <code>:wq</code> in <code>vim</code>)</li></ul></li><li><p><strong>GUI (e.g. SublimeText, Notepad++):</strong></p><ul><li>Just create new files in your editor.</li><li>Load the files using <code>:l</code> as noted above.</li><li>Once a file has been edited and saved, type <code>:r</code> to reload the files in
+  the interpreter</li></ul></li></ul><p>You are of course free to deviate from these suggestions as you see fit :-) It
+is just recommended that you have the C&#955;aSH interpreter open during this
+tutorial.</p></div><h1 id="g:4">Your first circuit</h1><div class="doc"><p>The very first circuit that we will build is the &quot;classic&quot; multiply-and-accumulate
+(MAC) circuit. This circuit is as simple as it sounds, it multiplies its inputs
+and accumulates them. Before we describe any logic, we must first create the
+file we will be working on and input some preliminaries:</p><ul><li><p>Create the file:</p><pre>MAC.hs
+</pre></li><li><p>Write on the first line the module header:</p><pre>module MAC where
+</pre><p>Module names must always start with a <strong>C</strong>apital letter. Also make sure that
+the file name corresponds to the module name.</p></li><li><p>Add the import statement for the C&#955;aSH prelude library:</p><pre>import CLaSH.Prelude
+</pre><p>This imports all the necessary functions and datatypes for circuit description.</p></li></ul><p>We can now finally start describing the logic of our circuit, starting with just
+the multiplication and addition:</p><pre>ma acc (x,y) = acc + x * y
+</pre><p>If you followed the instructions of running the interpreter side-by-side, you
+can already test this function:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>ma 4 (8,9)
+</code></strong>76
+<code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>ma 2 (3,4)
+</code></strong>14
+</pre><p>We can also examine the inferred type of <code>ma</code> in the interpreter:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t ma
+</code></strong>ma :: Num a =&gt; a -&gt; (a, a) -&gt; a
+</pre><p>Talking about <em>types</em> also brings us to one of the most important parts of this
+tutorial: <em>types</em> and <em>synchronous sequential logic</em>. Especially how we can
+always determine, through the types of a specification, if it describes
+combinational logic or (synchronous) sequential logic. We do this by examining
+the type of one of the sequential primitives, the <code><code><a href="CLaSH-Signal.html#v:register">register</a></code></code> function:</p><pre>register :: a -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a
+register i s = ...
+</pre><p>Where we see that the second argument and the result are not just of the
+<em>polymorphic</em> <code>a</code> type, but of the type: <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a</code>. All (synchronous)
+sequential circuits work on values of type <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a</code>. Combinational
+circuits always work on values of, well, not of type <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a</code>. A <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code>
+is an (infinite) list of samples, where the samples correspond to the values
+of the <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> at discrete, consecutive, ticks of the <em>clock</em>. All (sequential)
+components in the circuit are synchronized to this global <em>clock</em>. For the
+rest of this tutorial, and probably at any moment where you will be working with
+C&#955;aSH, you should probably not actively think about <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code>s as infinite lists
+of samples, but just as values that are manipulated by sequential circuits. To
+make this even easier, it actually not possible to manipulate the underlying
+representation directly: you can only modify <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> values through a set of
+primitives such as the <code><a href="CLaSH-Signal.html#v:register">register</a></code> function above.</p><p>Now, let us get back to the functionality of the <code><a href="CLaSH-Signal.html#v:register">register</a></code> function: it is
+a simple <code>latch</code> that only changes state at the tick of the global <em>clock</em>, and
+it has an initial value <code>a</code> which is its output at time 0. We can further
+examine the <code><a href="CLaSH-Signal.html#v:register">register</a></code> function by taking a look at the first 4 samples of the
+<code><a href="CLaSH-Signal.html#v:register">register</a></code> functions applied to a constant signal with the value 8:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>sampleN 4 (register 0 (signal 8))
+</code></strong>[0,8,8,8]
+</pre><p>Where we see that the initial value of the signal is the specified 0 value,
+followed by 8's.</p></div><h3 id="g:5">Sequential circuit</h3><div class="doc"><p>The <code><a href="CLaSH-Signal.html#v:register">register</a></code> function is our primary sequential building block to capture
+<em>state</em>. It is used internally by one of the <a href="CLaSH-Prelude.html">CLaSH.Prelude</a> function that we
+will use to describe our MAC circuit. Note that the following paragraphs will
+only show one of many ways to specify a sequential circuit, at the section we
+will show a couple more.</p><p>A principled way to describe a sequential circuit is to use one of the classic
+machine models, within the C&#955;aSH prelude library offer standard function to
+support the <a href="http://en.wikipedia.org/wiki/Mealy_machine">Mealy machine</a>.
+To improve sharing, we will combine the transition function and output function
+into one. This gives rise to the following Mealy specification of the MAC
+circuit:</p><pre>macT acc (x,y) = (acc',o)
+  where
+    acc' = ma acc (x,y)
+    o    = acc
+</pre><p>Note that the <code>where</code> clause and explicit tuple are just for demonstrative
+purposes, without loss of sharing we could've also written:</p><pre>macT acc inp = (ma acc inp,acc)
+</pre><p>Going back to the original specification we note the following:</p><ul><li><code>acc</code> is the current <em>state</em> of the circuit.</li><li>'(x,y)' is its input.</li><li><code>acc'</code> is the updated, or next, <em>state</em>.</li><li><code>o</code> is the output.</li></ul><p>When we examine the type of <code>macT</code> we see that is still completely combinational:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>:t macT
+</code></strong>macT :: Num t =&gt; t -&gt; (t, t) -&gt; (t, t)
+</pre><p>The <a href="CLaSH-Prelude.html">CLaSH.Prelude</a> library contains a function that creates a sequential
+circuit from a combinational circuit that has the same Mealy machine type /
+shape of <code>macT</code>:</p><pre>mealy :: (s -&gt; i -&gt; (s,o))
+      -&gt; s
+      -&gt; (<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> i -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> o)
+mealy f initS = ...
+</pre><p>The complete sequential MAC circuit can now be specified as:</p><pre>mac = <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> macT 0
+</pre><p>Where the first argument of <code><code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code></code> is our <code>macT</code> function, and the second
+argument is the initial state, in this case 0. We can see it is functioning
+correctly in our interpreter:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>import qualified Data.List as L
+</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>L.take 4 $ simulate mac [(1,1),(2,2),(3,3),(4,4)]
+</code></strong>[0,1,5,14]
+</pre><p>Where we simulate our sequential circuit over a list of input samples and take
+the first 4 output samples. We have now completed our first sequential circuit
+and have made an initial confirmation that it is working as expected.</p></div><h3 id="g:6">Generating VHDL</h3><div class="doc"><p>We are now almost at the point that we can create actual hardware, in the form
+of a <a href="http://en.wikipedia.org/wiki/VHDL">VHDL</a> netlist, from our sequential
+circuit specification. The first thing we have to do is create a function
+called <code>topEntity</code> and ensure that it has a <strong>monomorphic</strong> type. In our case
+that means that we have to give it an explicit type annotation. It might not
+always be needed, you can always check the type with the <code>:t</code> command and see
+if the function is monomorphic:</p><pre>topEntity :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9, <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9)
+topEntity = mac
+</pre><p>Which makes our circuit work on 9-bit signed integers. Including the above
+definition, our complete <code>MAC.hs</code> should now have the following content:</p><pre>module MAC where
+
+import CLaSH.Prelude
+
+ma acc (x,y) = acc + x * y
+
+macT acc (x,y) = (acc',o)
+  where
+    acc' = ma acc (x,y)
+    o    = acc
+
+mac = <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> macT 0
+
+topEntity :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9, <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9)
+topEntity = mac
+</pre><p>The <code>topEntity</code> function is the starting point for the C&#955;aSH compiler to
+transform your circuit description into a VHDL netlist. It must meet the
+following restrictions in order for the C&#955;aSH compiler to work:</p><ul><li>It must be completely monomorphic</li><li>It must be completely first-order</li></ul><p>Our <code>topEntity</code> meets those restrictions, and so we can convert it successfully
+to VHDL by executing the <code>:vhdl</code> command in the interpreter. This will create
+a directory called <code>vhdl</code>, which contains a directory called <code>MAC</code>, which
+ultimately contains all the generated VHDL files. You can now load these files
+into your favourite VHDL synthesis tool, marking <code>MAC_topEntity.vhdl</code> as the file
+containing the top level entity.</p></div><h3 id="g:7">Circuit testbench</h3><div class="doc"><p>There are multiple reasons as to why might you want to create a so-called
+<em>testbench</em> for the VHDL:</p><ul><li>You want to compare post-synthesis / post-place&amp;route behaviour to that of
+    the behaviour of the original VHDL.</li><li>Need representative stimuli for your dynamic power calculations</li><li>Verify that the VHDL output of the C&#955;aSH compiler has the same behaviour as
+    the Haskell / C&#955;aSH specification.</li></ul><p>For these purposes, you can have C&#955;aSH compiler generate a <code>MAC_testbench.vhdl</code>
+file which contains a stimulus generator and an expected output verifier. The
+C&#955;aSH compiler looks for the following functions to generate these to aspects:</p><ol><li><code>testInput</code> for the stimulus generator.</li><li><code>expectedOutput</code> for the output verification.</li></ol><p>Given a <code>topEntity</code> with the type:</p><pre><strong>topEntity</strong> :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> b
+</pre><p>Where <code>a</code> and <code>b</code> are placeholders for monomorphic types: the <code>topEntity</code> is
+not allowed to be polymorphic. So given the above type for the <code>topEntity</code>, the
+type of <code>testInput</code> should be:</p><pre><strong>testInput</strong> :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a
+</pre><p>And the type of <code>expectedOutput</code> should be:</p><pre><strong>expectedOutput</strong> :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> b -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool
+</pre><p>Where the <code>expectedOutput</code> function should assert to <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Bool.html#v:True">True</a></code> once it has verified
+all expected values. The <a href="CLaSH-Prelude.html">CLaSH.Prelude</a> module contains two standard functions
+to serve the above purpose, but a user is free to use any C&#955;aSH specification
+to describe these two functions. For this tutorial we will be using the
+functions specified in the <a href="CLaSH-Prelude.html">CLaSH.Prelude</a> module, which are <code><code><a href="CLaSH-Prelude-Testbench.html#v:stimuliGenerator">stimuliGenerator</a></code></code>
+and <code><code><a href="CLaSH-Prelude-Testbench.html#v:outputVerifier">outputVerifier</a></code></code>:</p><pre>testInput :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9,<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9)
+testInput = <code><a href="CLaSH-Prelude-Testbench.html#v:stimuliGenerator">stimuliGenerator</a></code> $(<code><a href="CLaSH-Sized-Vector.html#v:listToVecTH">listToVecTH</a></code> [(1,1) :: (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9,<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9),(2,2),(3,3),(4,4)])
+
+expectedOutput :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool
+expectedOutput = <code><a href="CLaSH-Prelude-Testbench.html#v:outputVerifier">outputVerifier</a></code> $(<code><a href="CLaSH-Sized-Vector.html#v:listToVecTH">listToVecTH</a></code> [0 :: <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 9,1,5,14])
+</pre><p>This will create a stimulus generator that creates the same inputs as we used
+earlier for the simulation of the circuit, and creates an output verifier that
+compares against the results we got from our earlier simulation. We can even
+simulate the behaviour of the <em>testbench</em>:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>sampleN 7 $ expectedOutput (topEntity testInput)
+</code></strong>[False,False,False,False
+cycle(system1000): 4, outputVerifier
+expected value: 14, not equal to actual value: 30
+,True
+cycle(system1000): 5, outputVerifier
+expected value: 14, not equal to actual value: 46
+,True
+cycle(system1000): 6, outputVerifier
+expected value: 14, not equal to actual value: 62
+,True]
+</pre><p>We can see that for the first 4 samples, everything is working as expected,
+after which warnings are being reported. The reason is that <code><a href="CLaSH-Prelude-Testbench.html#v:stimuliGenerator">stimuliGenerator</a></code>
+will keep on producing the last sample, (4,4), while the <code><a href="CLaSH-Prelude-Testbench.html#v:outputVerifier">outputVerifier</a></code> will
+keep on expecting the last sample, 14. In the VHDL testbench these errors won't
+show, as the the global clock will be stopped after 4 ticks.</p><p>You should now again run <code>:vhdl</code> in the interpreter; this time the compiler
+will take a bit longer to generate all the circuits. After it is finished you
+can load all the files in your favourite VHDL simulation tool. Once all files
+are loaded into the VHDL simulator, run the simulation on the <code>testbench</code> entity.
+On questasim / modelsim: doing a <code>run -all</code> will finish once the output verifier
+will assert its output to <code>true</code>. The generated testbench, modulo the clock
+signal generator(s), is completely synthesizable. This means that if you want to
+test your circuit on an FPGA, you will only have to replace the clock signal
+generator(s) by actual clock sources, such as an onboard PLL.</p></div><h3 id="g:8">Generating Verilog and SystemVerilog</h3><div class="doc"><p>Aside from being to generate VHDL, the C&#955;aSH compiler can also generate Verilog
+and SystemVerilog. You can repeat the previous two parts of the tutorial, but
+instead of executing the <code>:vhdl</code> command, you execute the <code>:verilog</code> or
+<code>:sytemverilog</code> command in the interpreter. This will create a directory called
+<code>verilog</code>, respectively <code>systemverilog</code>, which contains a directory called <code>MAC</code>,
+which ultimately contains all the generated Verilog and SystemVerilog files.
+Verilog files end in the file extension <code>v</code>, while SystemVerilog files end in
+the file extension <code>sv</code>.</p><p>This concludes the main part of this section on &quot;Your first circuit&quot;, read on
+for alternative specifications for the same <code>mac</code> circuit, or just skip to the
+next section where we will describe another DSP classic: an FIR filter
+structure.</p></div><h3 id="g:9">Alternative specifications</h3><div class="doc"><ul><li><p><strong><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Num">Num</a></code> instance for <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code></strong>:</p><p><code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a</code> is also also considered a <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Num">Num</a></code>eric type as long as the value
+type <em>a</em> is also <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Num">Num</a></code>eric.  This means that we can also use the standard
+numeric operators, such as (<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:-42-">*</a></code>) and (<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:-43-">+</a></code>), directly on signals. An
+alternative specification of the <code>mac</code> circuit will also use the <code><a href="CLaSH-Signal.html#v:register">register</a></code>
+function directly:</p><pre>macN (x,y) = acc
+  where
+    acc = <code><a href="CLaSH-Signal.html#v:register">register</a></code> 0 (acc + x * y)
+</pre></li><li><p><strong><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#t:Applicative">Applicative</a></code> instance for <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code></strong>:</p><p>We can also mix the combinational <code>ma</code> function, with the sequential
+<code><a href="CLaSH-Signal.html#v:register">register</a></code> function, by lifting the <code>ma</code> function to the sequential <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code>
+domain using the operators (<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Functor.html#v:-60--36--62-">&lt;$&gt;</a></code> and <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#v:-60--42--62-">&lt;*&gt;</a></code>) of the <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#t:Applicative">Applicative</a></code> type
+class:</p><pre>macA (x,y) = acc
+  where
+    acc  = <code><a href="CLaSH-Signal.html#v:register">register</a></code> 0 acc'
+    acc' = ma <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Functor.html#v:-60--36--62-">&lt;$&gt;</a></code> acc <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#v:-60--42--62-">&lt;*&gt;</a></code> <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> (x,y)
+</pre></li><li><p><strong><code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:State">State</a></code> Monad</strong></p><p>We can also implement the original <code>macT</code> function as a
+<code><code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:State">State</a></code></code>
+monadic computation. First we must an extra import statement, right after
+the import of <a href="CLaSH-Prelude.html">CLaSH.Prelude</a>:</p><pre>import Control.Monad.State
+</pre><p>We can then implement macT as follows:</p><pre>macTS (x,y) = do
+  acc &lt;- <code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:get">get</a></code>
+  <code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:put">put</a></code> (acc + x * y)
+  return acc
+</pre><p>We can use the <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> function again, although we will have to change
+position of the arguments and result:</p><pre>asStateM :: (i -&gt; <code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:State">State</a></code> s o)
+         -&gt; s
+         -&gt; (<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> i -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> o)
+asStateM f i = <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> g i
+  where
+    g s x = let (o,s') = <code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:runState">runState</a></code> (f x) s
+            in  (s',o)
+</pre><p>We can then create the complete <code>mac</code> circuit as:</p><pre>macS = asStateM macTS 0
+</pre></li></ul></div><h1 id="g:10">Higher-order functions</h1><div class="doc"><p>An FIR filter is defined as: the dot-product of a set of filter coefficients and
+a window over the input, where the size of the window matches the number
+of coefficients.</p><pre>dotp as bs = <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Foldable.html#v:sum">sum</a></code> (<code><a href="CLaSH-Sized-Vector.html#v:zipWith">zipWith</a></code> (*) as bs)
+
+fir coeffs x_t = y_t
+  where
+    y_t = dotp coeffs xs
+    xs  = <code><a href="CLaSH-Prelude.html#v:window">window</a></code> x_t
+
+topEntity :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 16) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 16)
+topEntity = fir (0 <code>:&gt;</code> 1 <code>:&gt;</code> 2 <code>:&gt;</code> 3 <code>:&gt;</code> <code><a href="CLaSH-Sized-Vector.html#v:Nil">Nil</a></code>)
+</pre><p>Here we can see that, although the C&#955;aSH compiler handles recursive function
+definitions poorly, many of the regular patterns that we often encounter in
+circuit design are already captured by the higher-order functions that are
+present for the <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor type.</p></div><h1 id="g:11">Composition of sequential circuits</h1><div class="doc"><p>Given a function <code>f</code> of type:</p><pre><strong>f</strong> :: Int -&gt; (Bool, Int) -&gt; (Int, (Int, Bool))
+</pre><p>When we want to make compositions of <code>f</code> in <code>g</code> using <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code>, we have to
+write:</p><pre>g a b c = (b1,b2,i2)
+  where
+    (i1,b1) = <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> (<code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> f 0 (<code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> (a,b)))
+    (i2,b2) = <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> (<code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> f 3 (<code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> (i1,c)))
+</pre><p>Why do we need these <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code>, and <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> functions you might ask? When we
+look at the type of <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code>:</p><pre><strong>mealy</strong> :: (s -&gt; i -&gt; (s,o))
+      -&gt; s
+      -&gt; (<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> i -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> o)
+</pre><p>we see that the resulting function has an input of type <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> i</code>, and an
+output of <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> o</code>. However, the type of <code>(a,b)</code> in the definition of <code>g</code> is:
+<code>(<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Int)</code>. And the type of <code>(i1,b1)</code> is of type
+<code>(<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Int, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool)</code>.</p><p>Syntactically, <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (Bool,Int)</code> and <code>(<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Int)</code> are <em>unequal</em>.
+So we need to make a conversion between the two, that is what <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> and
+<code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> are for. In the above case <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> gets the type:</p><pre><strong>bundle</strong> :: (<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Int) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (Bool,Int)
+</pre><p>and <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code>:</p><pre><strong>unbundle</strong> :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (Int,Bool) -&gt; (<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Int, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> Bool)
+</pre><p>The <em>true</em> types of these two functions are, however:</p><pre><strong>bundle</strong>   :: <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> a =&gt; <code><a href="CLaSH-Signal.html#t:Unbundled">Unbundled</a></code> a -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a
+<strong>unbundle</strong> :: <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> a =&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a -&gt; <code><a href="CLaSH-Signal.html#t:Unbundled">Unbundled</a></code> a
+</pre><p><code><a href="CLaSH-Signal.html#t:Unbundled">Unbundled</a></code> is an <a href="http://www.haskell.org/ghc/docs/latest/html/users_guide/type-families.html#assoc-decl">associated type family</a>
+belonging to the <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> <a href="http://en.wikipedia.org/wiki/Type_class">type class</a>,
+which, together with <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> and <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> defines the isomorphism between a
+product type of <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code>s and a <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> of a product type. That is, while
+<code>(Signal a, Signal b)</code> and <code>Signal (a,b)</code> are not equal, they are <em>isomorphic</em>
+and can be converted from, or to, the other using <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> and <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code>.</p><p>Instances of this <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> type-class are defined as <em>isomorphisms</em> for:</p><ul><li>All tuples until and including 8-tuples</li><li>The <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor type</li></ul><p>But they are defined as <em>identities</em> for:</p><ul><li>All elementary / primitive types such as: <code><a href="CLaSH-Sized-Internal-BitVector.html#t:Bit">Bit</a></code>, <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Bool.html#t:Bool">Bool</a></code>, <code><code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> n</code>, etc.</li></ul><p>That is:</p><pre>instance <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> (a,b) where
+  type <code><a href="CLaSH-Signal-Bundle.html#t:Unbundled-39-">Unbundled'</a></code> clk (a,b) = (<code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk a, <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk b)
+  bundle   (a,b) = (,) <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Functor.html#v:-60--36--62-">&lt;$&gt;</a></code> a <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#v:-60--42--62-">&lt;*&gt;</a></code> b
+  unbundle tup   = (fst <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Functor.html#v:-60--36--62-">&lt;$&gt;</a></code> tup, snd <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#v:-60--42--62-">&lt;*&gt;</a></code> tup)
+</pre><p>but,</p><pre>instance <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> Bool where
+  type <code><a href="CLaSH-Signal-Bundle.html#t:Unbundled-39-">Unbundled'</a></code> clk Bool = <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk Bool
+  bundle   s = s
+  unbundle s = s
+</pre><p>What you need take away from the above is that a product type (e.g. a tuple) of
+<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code>s is not syntactically equal to a <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> of a product type, but that
+the functions of the <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> type class allow easy conversion between the two.</p><p>As a final note on this section we also want to mention the <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB">mealyB</a></code> function,
+which does the bundling and unbundling for us:</p><pre>mealyB :: (<code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> i, <code><a href="CLaSH-Signal-Bundle.html#t:Bundle">Bundle</a></code> o)
+       =&gt; (s -&gt; i -&gt; (s,o))
+       -&gt; s
+       -&gt; (<code><a href="CLaSH-Signal.html#t:Unbundled">Unbundled</a></code> i -&gt; <code><a href="CLaSH-Signal.html#t:Unbundled">Unbundled</a></code> o)
+</pre><p>Using <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB">mealyB</a></code> we can define <code>g</code> as:</p><pre>g a b c = (b1,b2,i2)
+  where
+    (i1,b1) = <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB">mealyB</a></code> f 0 (a,b)
+    (i2,b2) = <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB">mealyB</a></code> f 3 (i1,c)
+</pre><p>The general rule of thumb is: always use <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code>, unless you do pattern matching
+or construction of product types, then use <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB">mealyB</a></code>.</p></div><h1 id="g:12">TopEntity annotations: controlling the VHDL/(System)Verilog generation.</h1><div class="doc"><p>The <code><a href="CLaSH-Annotations-TopEntity.html#t:TopEntity">TopEntity</a></code> annotations described in this section make it easier to put your
+C&#955;aSH design on an FPGA.</p><p>We can exert some control how the top level function is created by the C&#955;aSH
+compiler by annotating the <code>topEntity</code> function with a <code><a href="CLaSH-Annotations-TopEntity.html#t:TopEntity">TopEntity</a></code> annotation.
+You apply these annotations using the <code>ANN</code> pragma like so:</p><pre>{-# ANN topEntity (TopEntity {t_name = ..., ...  }) #-}
+topEntity x = ...
+</pre><p>For example, given the following specification:</p><pre>topEntity :: Signal Bit -&gt; Signal (BitVector 8)
+topEntity key1 = leds
+  where
+    key1R = isRising 1 key1
+    leds  = mealy blinkerT (1,False,0) key1R
+
+blinkerT (leds,mode,cntr) key1R = ((leds',mode',cntr'),leds)
+  where
+    -- clock frequency = 50e6   (50 MHz)
+    -- led update rate = 333e-3 (every 333ms)
+    cnt_max = 16650000 -- 50e6 * 333e-3
+
+    cntr' | cntr == cnt_max = 0
+          | otherwise       = cntr + 1
+
+    mode' | key1R     = not mode
+          | otherwise = mode
+
+    leds' | cntr == 0 = if mode then complement leds
+                                else rotateL leds 1
+          | otherwise = leds
+</pre><p>The C&#955;aSH compiler will normally generate the following <code>Blinker_topEntity.vhdl</code> file:</p><pre>-- Automatically generated VHDL
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.MATH_REAL.ALL;
+use work.all;
+use work.Blinker_types.all;
+
+entity Blinker_topEntity is
+  port(input_0         : in std_logic_vector(0 downto 0);
+       -- clock
+       system1000      : in std_logic;
+       -- asynchronous reset: active low
+       system1000_rstn : in std_logic;
+       output_0        : out std_logic_vector(7 downto 0));
+end;
+
+architecture structural of Blinker_topEntity is
+begin
+  Blinker_topEntity_0_inst : entity Blinker_topEntity_0
+    port map
+      (key1_i1         =&gt; input_0
+      ,system1000      =&gt; system1000
+      ,system1000_rstn =&gt; system1000_rstn
+      ,topLet_o        =&gt; output_0);
+end;
+</pre><p>However, if we add the following <code><a href="CLaSH-Annotations-TopEntity.html#t:TopEntity">TopEntity</a></code> annotation in the file:</p><pre>{-# ANN topEntity
+  (<code><a href="CLaSH-Annotations-TopEntity.html#v:defTop">defTop</a></code>
+    { t_name     = &quot;blinker&quot;
+    , t_inputs   = [&quot;KEY1&quot;]
+    , t_outputs  = [&quot;LED&quot;]
+    , t_extraIn  = [ (&quot;CLOCK_50&quot;, 1)
+                   , (&quot;KEY0&quot;    , 1)
+                   ]
+    , t_clocks   = [ <code><a href="CLaSH-Annotations-TopEntity.html#v:altpll">altpll</a></code> &quot;altpll50&quot; &quot;CLOCK_50(0)&quot; &quot;not KEY0(0)&quot; ]
+    }) #-}
+</pre><p>The C&#955;aSH compiler will generate the following <code>blinker.vhdl</code> file instead:</p><pre>-- Automatically generated VHDL
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use IEEE.MATH_REAL.ALL;
+use work.all;
+use work.Blinker_types.all;
+
+entity blinker is
+  port(KEY1     : in std_logic_vector(0 downto 0);
+       CLOCK_50 : in std_logic_vector(0 downto 0);
+       KEY0     : in std_logic_vector(0 downto 0);
+       LED      : out std_logic_vector(7 downto 0));
+end;
+
+architecture structural of blinker is
+  signal system1000      : std_logic;
+  signal system1000_rstn : std_logic;
+  signal altpll50_locked : std_logic;
+begin
+  altpll50_inst : entity altpll50
+    port map
+      (inclk0 =&gt; CLOCK_50(0)
+      ,c0     =&gt; system1000
+      ,areset =&gt; not KEY0(0)
+      ,locked =&gt; altpll50_locked);
+
+  -- reset system1000_rstn is asynchronously asserted, but synchronously de-asserted
+  resetSync_n_0 : block
+    signal n_1 : std_logic;
+    signal n_2 : std_logic;
+  begin
+    process(system1000,altpll50_locked)
+    begin
+      if altpll50_locked = '0' then
+        n_1 &lt;= '0';
+        n_2 &lt;= '0';
+      elsif rising_edge(system1000) then
+        n_1 &lt;= '1';
+        n_2 &lt;= n_1;
+      end if;
+    end process;
+
+    system1000_rstn &lt;= n_2;
+  end block;
+
+  Blinker_topEntity_0_inst : entity Blinker_topEntity_0
+    port map
+      (key1_i1         =&gt; KEY1
+      ,system1000      =&gt; system1000
+      ,system1000_rstn =&gt; system1000_rstn
+      ,topLet_o        =&gt; LED);
+end;
+</pre><p>Where we now have:</p><ul><li>A top-level component that is called <code>blinker</code>.</li><li>Inputs and outputs that have a <em>user</em>-chosen name: <code>KEY1</code>, <code>LED</code>, etc.</li><li>An instantiated <a href="https://www.altera.com/literature/ug/ug_altpll.pdf">PLL</a>
+  component providing a stable clock signal from the free-running clock pin
+  <code>CLOCK_50</code>.</li><li>A reset that is <em>asynchronously</em> asserted by the <code>lock</code> signal originating from
+  the PLL, meaning that your design is kept in reset until the PLL is
+  providing a stable clock.
+  The reset is additionally <em>synchronously</em> de-asserted to prevent
+  <a href="http://en.wikipedia.org/wiki/Metastability_in_electronics">metastability</a>
+  of your design due to unlucky timing of the de-assertion of the reset.</li></ul><p>See the documentation of <code><a href="CLaSH-Annotations-TopEntity.html#t:TopEntity">TopEntity</a></code> for the meaning of all its fields.</p></div><h1 id="g:13">Multiple clock domains</h1><div class="doc"><p><a id="multiclock"></a>
+C&#955;aSH supports multi-clock designs, though perhaps in a slightly limited form.
+What is possible is:</p><ul><li>Explicitly assign clocks to memory primitives.</li><li>Synchronise between differently-clocked parts of your design in a type-safe
+  way.</li></ul><p>What is <em>not</em> possible is:</p><ul><li>Generate a clock signal in module A, and assign this clock signal to a memory
+  primitive in module B.</li></ul><p>What this means is that when C&#955;aSH converts your design to VHDL/(System)Verilog,
+you end up with a top-level module/entity with multiple clock and reset ports
+for the different clock domains. If you're targeting an FPGA, you can use e.g. a
+<a href="https://www.altera.com/literature/ug/ug_altpll.pdf">PPL</a> or
+<a href="http://www.xilinx.com/support/documentation/user_guides/ug472_7Series_Clocking.pdf">MMCM</a>
+to provide the clock signals.</p><h2>Building a FIFO synchroniser</h2><p>This part of the tutorial assumes you know what <a href="https://en.wikipedia.org/wiki/Metastability_in_electronics">metastability</a>
+is, and how it can never truly be avoided in any asynchronous circuit. Also
+it assumes that you are familiar with the design of synchronizer circuits, and
+why a dual flip-flop synchroniser only works for bit-synchronisation and not
+word-synchronisation.
+The explicitly clocked versions of all synchronous functions and primitives can
+be found in <a href="CLaSH-Prelude-Explicit.html">CLaSH.Prelude.Explicit</a>, which also re-exports the functions in
+<a href="CLaSH-Signal-Explicit.html">CLaSH.Signal.Explicit</a>. We will use those functions to create a FIFO where
+the read and write port are synchronised to different clocks. Below you can find
+the code to build the FIFO synchroniser based on the design described in:
+<a href="http://www.sunburst-design.com/papers/CummingsSNUG2002SJ_FIFO1.pdf">http://www.sunburst-design.com/papers/CummingsSNUG2002SJ_FIFO1.pdf</a></p><p>We start with enable a few options that will make writing the type-signatures for
+our components a bit easier. We'll also import the standard <a href="CLaSH-Prelude.html">CLaSH.Prelude</a>
+module, and the <a href="CLaSH-Prelude-Explicit.html">CLaSH.Prelude.Explicit</a> module for our explicitly clocked
+synchronous functions:</p><pre>{-# LANGUAGE PartialTypeSignatures #-}
+{-# OPTIONS_GHC -fno-warn-partial-type-signatures #-}
+module MultiClockFifo where
+
+import CLaSH.Prelude
+import CLaSH.Prelude.Explicit
+import Data.Maybe             (isJust)
+</pre><p>Then we'll start with the <em>heart</em> of the FIFO synchroniser, an asynchronous RAM
+in the form of <code><a href="CLaSH-Prelude-RAM.html#v:asyncRam-39-">asyncRam'</a></code>. It's called an asynchronous RAM because the read
+port is not synchronised to any clock (though the write port is). Note that in
+C&#955;aSH we don't really have asynchronous logic, there is only combinational and
+synchronous logic. As a consequence, we see in the type signature of <code><a href="CLaSH-Prelude-RAM.html#v:asyncRam-39-">asyncRam'</a></code>:</p><pre><strong>asyncRam'</strong>
+  :: _
+  =&gt; SClock wclk                   -- ^ Clock to which to synchronise the write port of the RAM
+  -&gt; SClock rclk                   -- ^ Clock to which the read address signal <strong>r</strong> is synchronised
+  -&gt; SNat n                        -- ^ Size <strong>n</strong> of the RAM
+  -&gt; Signal' rclk addr             -- ^ Read address <strong>r</strong>
+  -&gt; Signal' wclk (Maybe (addr,a)) -- ^ (write address <code>w</code>, value to write)
+  -&gt; Signal' rclk a                -- ^ Value of the RAM at address <strong>r</strong>
+</pre><p>that the signal containing the read address <strong>r</strong> is synchronised to a different
+clock. That is, there is <strong>no</strong> such thing as an <code>AsyncSignal</code> in C&#955;aSH.</p><p>We continue by instantiating the <code><a href="CLaSH-Prelude-RAM.html#v:asyncRam-39-">asyncRam'</a></code>:</p><pre>fifoMem wclk rclk addrSize wfull raddr wdataM =
+  <code><a href="CLaSH-Prelude-RAM.html#v:asyncRam-39-">asyncRam'</a></code> wclk rclk
+            (<code><a href="CLaSH-Promoted-Nat.html#v:pow2SNat">pow2SNat</a></code> addrSize)
+            raddr
+            (<code><a href="CLaSH-Signal-Internal.html#v:mux">mux</a></code> (not &lt;$&gt; wfull)
+                 wdataM
+                 (pure Nothing))
+</pre><p>We see that we give it <code>2^addrSize</code> elements, where <code>addrSize</code> is the bit-size
+of the address. Also, we only write new values to the ram when a new write is
+requested, indicated by <code>winc</code>, and the buffer is not full, indicated by
+<code>wfull</code>.</p><p>The next part of the design calculates the read and write address for the
+asynchronous RAM, and creates the flags indicating whether the FIFO is full
+or empty. The address and flag generator is given in <code><a href="CLaSH-Prelude-Mealy.html#v:mealy">mealy</a></code> machine style:</p><pre>ptrCompareT addrSize flagGen (bin,ptr,flag) (s_ptr,inc) =
+    ((bin',ptr',flag')
+    ,(flag,addr,ptr))
+  where
+    -- GRAYSTYLE2 pointer
+    bin' = bin + <code><a href="CLaSH-Class-BitPack.html#v:boolToBV">boolToBV</a></code> (inc &amp;&amp; not flag)
+    ptr' = (bin' `shiftR` 1) `xor` bin'
+    addr = <code><a href="CLaSH-Prelude-BitIndex.html#v:slice">slice</a></code> (addrSize `<code><a href="CLaSH-Promoted-Nat.html#v:subSNat">subSNat</a></code>` d1) d0 bin
+
+    flag' = flagGen ptr' s_ptr
+</pre><p>It is parametrised in both address size, <code>addrSize</code>, and status flag generator,
+<code>flagGen</code>. It has two inputs, <code>s_ptr</code>, the synchronised pointer from the other
+clock domain, and <code>inc</code>, which indicates we want to perform a write or read of
+the FIFO. It creates three outputs: <code>flag</code>, the full or empty flag, <code>addr</code>, the
+read or write address into the RAM, and <code>ptr</code>, the Gray-encoded version of the
+read or write address which will be synchronised between the two clock domains.</p><p>Next follow the initial states of address generators, and the flag generators
+for the empty and full flags:</p><pre>-- FIFO empty: when next pntr == synchronized wptr or on reset
+isEmpty       = (==)
+rptrEmptyInit = (0,0,True)
+
+-- FIFO full: when next pntr == synchonized {~wptr[addrSize:addrSize-1],wptr[addrSize-1:0]}
+isFull addrSize ptr s_ptr =
+    ptr == <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Bits.html#v:complement">complement</a></code> (<code><a href="CLaSH-Prelude-BitIndex.html#v:slice">slice</a></code> addrSize (addrSize `<code><a href="CLaSH-Promoted-Nat.html#v:subSNat">subSNat</a></code>` d1) s_ptr) <code><a href="CLaSH-Sized-Internal-BitVector.html#v:-43--43--35-">++#</a></code>
+                      <code><a href="CLaSH-Prelude-BitIndex.html#v:slice">slice</a></code> (addrSize `<code><a href="CLaSH-Promoted-Nat.html#v:subSNat">subSNat</a></code>` d2) d0  s_ptr
+
+wptrFullInit        = (0,0,False)
+</pre><p>We create a dual flip-flop synchroniser to be used to synchronise the
+Gray-encoded pointers between the two clock domains:</p><pre>ptrSync clk1 clk2 = <code><a href="CLaSH-Signal-Explicit.html#v:register-39-">register'</a></code> clk2 0
+                  . <code><a href="CLaSH-Signal-Explicit.html#v:register-39-">register'</a></code> clk2 0
+                  . <code><a href="CLaSH-Signal-Explicit.html#v:unsafeSynchronizer">unsafeSynchronizer</a></code> clk1 clk2
+</pre><p>It uses the <code>unsafeSynchroniser</code> primitive, which is needed to go from one clock
+domain to the other. All synchronizers are specified in terms of
+<code><a href="CLaSH-Signal-Explicit.html#v:unsafeSynchronizer">unsafeSynchronizer</a></code> (see for example the <a href="src/CLaSH-Prelude-RAM.html#line-103">source of asyncRam#</a>).
+The <code><a href="CLaSH-Signal-Explicit.html#v:unsafeSynchronizer">unsafeSynchronizer</a></code> primitive is turned into a (bundle of) wire(s) by the
+C&#955;aSH compiler, so developers must ensure that it is only used as part of a
+proper synchronizer.</p><p>Finally we combine all the component in:</p><pre>fifo
+  :: _
+  =&gt; SNat (addrSize + 2)
+  -&gt; SClock wclk
+  -&gt; SClock rclk
+  -&gt; Signal' rclk Bool
+  -&gt; Signal' wclk (Maybe a)
+  -&gt; (Signal' rclk a, Signal' rclk Bool, Signal' wclk Bool)
+fifo addrSize wclk rclk rinc wdataM = (rdata,rempty,wfull)
+  where
+    s_rptr = ptrSync rclk wclk rptr
+    s_wptr = ptrSync wclk rclk wptr
+
+    rdata = fifoMem wclk rclk addrSize wfull raddr
+               (liftA2 (,) &lt;$&gt; (Just &lt;$&gt; waddr) &lt;*&gt; wdataM)
+
+    (rempty,raddr,rptr) = <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB-39-">mealyB'</a></code> rclk (ptrCompareT addrSize isEmpty) rptrEmptyInit
+                                  (s_wptr,rinc)
+
+    (wfull,waddr,wptr)  = <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB-39-">mealyB'</a></code> wclk (ptrCompareT addrSize (isFull addrSize))
+                                  wptrFullInit (s_rptr,isJust &lt;$&gt; wdataM)
+</pre><p>where we first specify the synchronisation of the read and the write pointers,
+instantiate the asynchronous RAM, and instantiate the read address / pointer /
+flag generator and write address / pointer / flag generator.</p><p>Ultimately, the whole file containing our FIFO design will look like this:</p><pre>{-# LANGUAGE PartialTypeSignatures #-}
+{-# OPTIONS_GHC -fno-warn-partial-type-signatures #-}
+module MultiClockFifo where
+
+import CLaSH.Prelude
+import CLaSH.Prelude.Explicit
+import Data.Maybe             (isJust)
+
+fifoMem wclk rclk addrSize wfull raddr wdataM =
+  <code><a href="CLaSH-Prelude-RAM.html#v:asyncRam-39-">asyncRam'</a></code> wclk rclk
+            (<code><a href="CLaSH-Promoted-Nat.html#v:pow2SNat">pow2SNat</a></code> addrSize)
+            raddr
+            (<code><a href="CLaSH-Signal-Internal.html#v:mux">mux</a></code> (not &lt;$&gt; wfull)
+                 wdataM
+                 (pure Nothing))
+
+ptrCompareT addrSize flagGen (bin,ptr,flag) (s_ptr,inc) =
+    ((bin',ptr',flag')
+    ,(flag,addr,ptr))
+  where
+    -- GRAYSTYLE2 pointer
+    bin' = bin + <code><a href="CLaSH-Class-BitPack.html#v:boolToBV">boolToBV</a></code> (inc &amp;&amp; not flag)
+    ptr' = (bin' `shiftR` 1) `xor` bin'
+    addr = <code><a href="CLaSH-Prelude-BitIndex.html#v:slice">slice</a></code> (addrSize `<code><a href="CLaSH-Promoted-Nat.html#v:subSNat">subSNat</a></code>` d1) d0 bin
+
+    flag' = flagGen ptr' s_ptr
+
+-- FIFO empty: when next pntr == synchronized wptr or on reset
+isEmpty       = (==)
+rptrEmptyInit = (0,0,True)
+
+-- FIFO full: when next pntr == synchonized {~wptr[addrSize:addrSize-1],wptr[addrSize-1:0]}
+isFull addrSize ptr s_ptr =
+    ptr == <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Bits.html#v:complement">complement</a></code> (<code><a href="CLaSH-Prelude-BitIndex.html#v:slice">slice</a></code> addrSize (addrSize `<code><a href="CLaSH-Promoted-Nat.html#v:subSNat">subSNat</a></code>` d1) s_ptr) <code><a href="CLaSH-Sized-Internal-BitVector.html#v:-43--43--35-">++#</a></code>
+                      <code><a href="CLaSH-Prelude-BitIndex.html#v:slice">slice</a></code> (addrSize `<code><a href="CLaSH-Promoted-Nat.html#v:subSNat">subSNat</a></code>` d2) d0  s_ptr
+
+wptrFullInit        = (0,0,False)
+
+-- Dual flip-flip synchroniser
+ptrSync clk1 clk2 = <code><a href="CLaSH-Signal-Explicit.html#v:register-39-">register'</a></code> clk2 0
+                  . <code><a href="CLaSH-Signal-Explicit.html#v:register-39-">register'</a></code> clk2 0
+                  . <code><a href="CLaSH-Signal-Explicit.html#v:unsafeSynchronizer">unsafeSynchronizer</a></code> clk1 clk2
+
+-- Async FIFO synchroniser
+fifo
+  :: _
+  =&gt; SNat (addrSize + 2)
+  -&gt; SClock wclk
+  -&gt; SClock rclk
+  -&gt; Signal' rclk Bool
+  -&gt; Signal' wclk (Maybe a)
+  -&gt; (Signal' rclk a, Signal' rclk Bool, Signal' wclk Bool)
+fifo addrSize wclk rclk rinc wdataM = (rdata,rempty,wfull)
+  where
+    s_rptr = ptrSync rclk wclk rptr
+    s_wptr = ptrSync wclk rclk wptr
+
+    rdata = fifoMem wclk rclk addrSize wfull raddr
+               (liftA2 (,) &lt;$&gt; (Just &lt;$&gt; waddr) &lt;*&gt; wdataM)
+
+    (rempty,raddr,rptr) = <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB-39-">mealyB'</a></code> rclk (ptrCompareT addrSize isEmpty) rptrEmptyInit
+                                  (s_wptr,rinc)
+
+    (wfull,waddr,wptr)  = <code><a href="CLaSH-Prelude-Mealy.html#v:mealyB-39-">mealyB'</a></code> wclk (ptrCompareT addrSize (isFull addrSize))
+                                  wptrFullInit (s_rptr,isJust &lt;$&gt; wdataM)
+</pre><h2>Instantiating a FIFO synchroniser</h2><p>Having finished our FIFO synchroniser it's time to instantiate with concrete
+clock domains. Let us assume we have part of our system connected to an ADC
+which runs at 20 MHz, and we have created an FFT component running at only 9 MHz,
+while the rest of our system runs at 50 MHz. What we want to do connect part
+of our design connected to the ADC, and running at 20 MHz, to part of our design
+connected to the FFT running at 9 MHz.</p><p>First, we must calculate the relative clock periods using <code><a href="CLaSH-Signal-Explicit.html#v:freqCalc">freqCalc</a></code>:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>freqCalc [20,9,50]
+</code></strong>[45,100,18]
+</pre><p>We can then create the clocks:</p><pre>type ClkADC = 'Clk &quot;ADC&quot;    45
+type ClkFFT = 'Clk &quot;FFT&quot;    100
+type ClkSys = 'Clk &quot;System&quot; 18
+
+clkADC :: SClock ClkADC
+clkADC = sclock
+
+clkFFT :: SClock ClkFFT
+clkFFT = sclock
+
+clkSys :: SClock ClkSys
+clkSys = sclock
+</pre><p>and subsequently a 256-space FIFO synchroniser that safely bridges the ADC clock
+domain and to the FFT clock domain:</p><pre>adcToFFT
+  :: Signal' ClkFFT Bool
+  -&gt; Signal' ClkADC (Maybe (SFixed 8 8))
+  -&gt; (Signal' ClkFFT (SFixed 8 8), Signal' ClkFFT Bool, Signal' ClkADC Bool)
+adcToFFT = fifo d8 clkADC clkFFT
+</pre></div><h1 id="g:14">Advanced: Primitives</h1><div class="doc"><p>There are times when you already have an existing piece of IP, or there are
+times where you need the VHDL to have a specific shape so that the VHDL
+synthesis tool can infer a specific component. In these specific cases you can
+resort to defining your own VHDL primitives. Actually, most of the primitives
+in C&#955;aSH are specified in the same way as you will read about in this section.
+There are perhaps 10 (at most) functions which are truly hard-coded into the
+C&#955;aSH compiler. You can take a look at the files in
+<a href="https://github.com/clash-lang/clash-compiler/tree/master/clash-vhdl/primitives">https://github.com/clash-lang/clash-compiler/tree/master/clash-vhdl/primitives</a>
+(or <a href="https://github.com/clash-lang/clash-compiler/tree/master/clash-verilog/primitives">https://github.com/clash-lang/clash-compiler/tree/master/clash-verilog/primitives</a>
+for the Verilog primitives or <a href="https://github.com/clash-lang/clash-compiler/tree/master/clash-systemverilog/primitives">https://github.com/clash-lang/clash-compiler/tree/master/clash-systemverilog/primitives</a>
+for the SystemVerilog primitives) if you want to know which functions are defined
+as &quot;regular&quot; primitives. The compiler looks for primitives in two locations:</p><ul><li>The official install location: e.g.</li><li><pre>$CABAL_DIR/share/&lt;GHC_VERSION&gt;/clash-vhdl-&lt;VERSION&gt;/primitives</pre></li><li><pre>$CABAL_DIR/share/&lt;GHC_VERSION&gt;/clash-verilog-&lt;VERSION&gt;/primitives</pre></li><li><pre>$CABAL_DIR/share/&lt;GHC_VERSION&gt;/clash-systemverilog-&lt;VERSION&gt;/primitives</pre></li><li>The current directory (the location given by <code>pwd</code>)</li></ul><p>Where redefined primitives in the current directory will overwrite those in
+the official install location. For now, files containing primitive definitions
+must end in the <code>.json</code> file-extension.</p><p>C&#955;aSH differentiates between two types of primitives, <em>expression</em> primitives
+and <em>declaration</em> primitives, corresponding to whether the primitive is a VHDL
+<em>expression</em> or a VHDL <em>declaration</em>. We will first explore <em>expression</em>
+primitives, using <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> multiplication (<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:-42-">*</a></code>) as an example. The
+<a href="CLaSH-Sized-Internal-Signed.html">CLaSH.Sized.Internal.Signed</a> module specifies multiplication as follows:</p><pre>(*#) :: <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:KnownNat">KnownNat</a></code> n =&gt; <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> n -&gt; <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> n -&gt; <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> n
+(S a) *# (S b) = fromInteger_INLINE (a * b)
+{-# NOINLINE (*#) #-}
+</pre><p>For which the VHDL <em>expression</em> primitive is:</p><pre>{ &quot;BlackBox&quot; :
+  { &quot;name&quot;      : &quot;CLaSH.Sized.Internal.Signed.*#&quot;
+  , &quot;templateE&quot; : &quot;resize(~ARG[1] * ~ARG[2], ~LIT[0])&quot;
+  }
+}
+</pre><p>The <code>name</code> of the primitive is the <em>fully qualified</em> name of the function you
+are creating the primitive for. Because we are creating an <em>expression</em>
+primitive we define a <code>template<strong>E</strong></code> field. As the name suggest, it is a VHDL
+<em>template</em>, meaning that the compiler must fill in the holes heralded by the
+tilde (~). Here:</p><ul><li><code>~ARG[1]</code> denotes the second argument given to the <code>(*#)</code> function, which
+    corresponds to the LHS of the (<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:-42-">*</a></code>) operator.</li><li><code>~ARG[2]</code> denotes the third argument given to the <code>(*#)</code> function, which
+    corresponds to the RHS of the (<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:-42-">*</a></code>) operator.</li><li><code>~LIT[0]</code> denotes the first argument given to the <code>(*#)</code> function, with
+    the extra condition that it must be a <code>LIT</code>eral. If for some reason this
+    first argument does not turn out to be a literal then the compiler will
+    raise an error. This first arguments corresponds to the &quot;<code><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:KnownNat">KnownNat</a></code> n</code>&quot;
+    class constraint.</li></ul><p>An extensive list with all of the template holes will be given the end of this
+section. What we immediately notice is that class constraints are counted as
+normal arguments in the primitive definition. This is because these class
+constraints are actually represented by ordinary record types, with fields
+corresponding to the methods of the type class. In the above case, <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:KnownNat">KnownNat</a></code>
+is actually just like a <code>newtype</code> wrapper for <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code>.</p><p>The second kind of primitive that we will explore is the <em>declaration</em> primitive.
+We will use <code><a href="CLaSH-Prelude-BlockRam.html#v:blockRam-35-">blockRam#</a></code> as an example, for which the Haskell/C&#955;aSH code is:</p><pre>-- | blockRAM primitive
+blockRam# :: <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/GHC-TypeLits.html#t:KnownNat">KnownNat</a></code> n
+          =&gt; <code><a href="CLaSH-Signal-Internal.html#t:SClock">SClock</a></code> clk       -- ^ <code><a href="CLaSH-Signal-Internal.html#t:Clock">Clock</a></code> to synchronize to
+          -&gt; <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code> n a          -- ^ Initial content of the BRAM, also
+                              -- determines the size, <code>n</code>, of the BRAM.
+                              --
+                              -- <strong>NB</strong>: <strong>MUST</strong> be a constant.
+          -&gt; <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk Int  -- ^ Read address <code>r</code>
+          -&gt; <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk Bool -- ^ Write enable
+          -&gt; <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk Int  -- ^ Write address <code>w</code>
+          -&gt; <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk a    -- ^ Value to write (at address <code>w</code>)
+          -&gt; <code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code> clk a
+          -- ^ Value of the <code>blockRAM</code> at address <code>r</code> from the previous clock
+          -- cycle
+blockRam# clk content rd en wr din =
+    <code><a href="CLaSH-Signal-Explicit.html#v:register-39-">register'</a></code> clk (<code><a href="CLaSH-XException.html#v:errorX">errorX</a></code> &quot;blockRam#: intial value undefined&quot;) dout
+  where
+    szI  = <code><a href="CLaSH-Sized-Vector.html#v:length">length</a></code> content
+    dout = runST $ do
+      arr &lt;- newListArray (0,szI-1) (<code><a href="CLaSH-Sized-Vector.html#v:toList">toList</a></code> content)
+      traverse (ramT arr) (<code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> (rd,en,wr,din))
+
+    ramT :: STArray s Int e -&gt; (Int,Bool,Int,e) -&gt; ST s e
+    ramT ram (r,e,w,d) = do
+      -- reading from address using an <code>X</code> exception results in an <code>X</code> result
+      r' &lt;- unsafeIOToST $
+               catch (evaluate r &gt;&gt;= (return . Right))
+                     ((err :: XException) -&gt; return (Left (throw err)))
+      d' &lt;- case r' of
+              Right r2 -&gt; readArray ram r2
+              Left err -&gt; return err
+      -- writing to an address using an <code>X</code> exception makes everything <code>X</code>
+      when e (writeArray ram w d)
+      return d'
+{-# NOINLINE blockRam# #-}
+</pre><p>And for which the <em>declaration</em> primitive is:</p><pre>{ &quot;BlackBox&quot; :
+    { &quot;name&quot; : &quot;CLaSH.Prelude.BlockRam.blockRam#&quot;
+    , &quot;type&quot; :
+&quot;blockRam# :: KnownNat n       -- ARG[0]
+           =&gt; SClock clk       -- clk,  ARG[1]
+           -&gt; Vec n a          -- init, ARG[2]
+           -&gt; Signal' clk Int  -- rd,   ARG[3]
+           -&gt; Signal' clk Bool -- wren, ARG[4]
+           -&gt; Signal' clk Int  -- wr,   ARG[5]
+           -&gt; Signal' clk a    -- din,  ARG[6]
+           -&gt; Signal' clk a&quot;
+    , &quot;templateD&quot; :
+&quot;-- blockRam begin
+~GENSYM[~COMPNAME_blockRam][0] : block
+  signal ~GENSYM[RAM][1] : ~TYP[2] := ~LIT[2];~IF ~VIVADO ~THEN
+  signal ~GENSYM[dout][2] : std_logic_vector(~SIZE[~TYP[6]]-1 downto 0);~ELSE
+  signal ~SYM[2] : ~TYP[6];~FI
+  signal ~GENSYM[rd][3] : integer range 0 to ~LIT[0] - 1;
+  signal ~GENSYM[wr][4] : integer range 0 to ~LIT[0] - 1;
+begin
+  ~SYM[3] &lt;= to_integer(~ARG[3])
+  -- pragma translate_off
+                mod ~LIT[0]
+  -- pragma translate_on
+                ;
+
+  ~SYM[4] &lt;= to_integer(~ARG[5])
+  -- pragma translate_off
+                mod ~LIT[0]
+  -- pragma translate_on
+                ;
+
+  ~GENSYM[blockRam_sync][5] : process(~CLK[1])
+  begin
+    if rising_edge(~CLK[1]) then
+      if ~ARG[4] then~IF ~VIVADO ~THEN
+        ~SYM[1](~SYM[4]) &lt;= ~TOBV[~ARG[6]][~TYP[6]];~ELSE
+        ~SYM[1](~SYM[4]) &lt;= ~ARG[6];~FI
+      end if;
+      ~SYM[2] &lt;= ~SYM[1](~SYM[3]);
+    end if;
+  end process;~IF ~VIVADO ~THEN
+  ~RESULT &lt;= ~FROMBV[~SYM[2]][~TYPO];~ELSE
+  ~RESULT &lt;= ~SYM[2];~FI
+end block;
+-- blockRam end&quot;
+    }
+}
+</pre><p>Again, the <code>name</code> of the primitive is the fully qualified name of the function
+you are creating the primitive for. Because we are creating a <em>declaration</em>
+primitive we define a <code>template<strong>D</strong></code> field. Instead of discussing what the
+individual template holes mean in the above context, we will instead just give
+a general listing of the available template holes:</p><ul><li><code>~RESULT</code>: VHDL signal to which the result of a primitive must be assigned
+  to. NB: Only used in a <em>declaration</em> primitive.</li><li><code>~ARG[N]</code>: <code>(N+1)</code>'th argument to the function.</li><li><code>~LIT[N]</code>: <code>(N+1)</code>'th argument to the function An extra condition that must
+  hold is that this <code>(N+1)</code>'th argument is an (integer) literal.</li><li><code>~CLK[N]</code>: Clock signal to which the <code>(N+1)</code>'th argument is synchronized to.</li><li><code>~CLKO</code>: Clock signal to which the result is synchronized to.</li><li><code>~RST[N]</code>: Asynchronous reset signal to the clock to which the <code>(N+1)</code>'th
+  argument is synchronized to.</li><li><code>~RSTO</code>: Asynchronous reset signal to the clock to which the result is
+  synchronized to.</li><li><code>~TYP[N]</code>: VHDL type of the <code>(N+1)</code>'th argument.</li><li><code>~TYPO</code>: VHDL type of the result.</li><li><code>~TYPM[N]</code>: VHDL type<em>name</em> of the <code>(N+1)</code>'th argument; used in <em>type</em>
+  <em>qualification</em>.</li><li><code>~TYPM</code>: VHDL type<em>name</em> of the result; used in <em>type qualification</em>.</li><li><code>~ERROR[N]</code>: Error value for the VHDL type of the <code>(N+1)</code>'th argument.</li><li><code>~ERRORO</code>: Error value for the VHDL type of the result.</li><li><code>~GENSYM[&lt;NAME&gt;][N]</code>: Create a unique name, trying to stay as close to
+  the given <code>&lt;NAME&gt;</code> as possible. This unique symbol can be referred to in
+  other places using <code>~SYM[N]</code>.</li><li><code>~SYM[N]</code>: a reference to the unique symbol created by <code>~GENSYM[&lt;NAME&gt;][N]</code>.</li><li><code>~SIGD[&lt;HOLE&gt;][N]</code>: Create a signal declaration, using <code>&lt;HOLE&gt;</code> as the name
+  of the signal, and the type of the <code>(N+1)</code>'th argument.</li><li><code>~SIGDO[&lt;HOLE&gt;]</code>: Create a signal declaration, using <code>&lt;HOLE&gt;</code> as the name
+  of the signal, and the type of the result.</li><li><code>~TYPELEM[&lt;HOLE&gt;]</code>: The element type of the vector type represented by <code>&lt;HOLE&gt;</code>.
+  The content of <code>&lt;HOLE&gt;</code> must either be: <code>TYPM[N]</code>, <code>TYPO</code>, or <code>TYPELEM[&lt;HOLE&gt;]</code>.</li><li><code>~COMPNAME</code>: The name of the component in which the primitive is instantiated.</li><li><code>~LENGTH[&lt;HOLE&gt;]</code>: The vector length of the type represented by <code>&lt;HOLE&gt;</code>.</li><li><code>~DEPTH[&lt;HOLE&gt;]</code>: The tree depth of the type represented by <code>&lt;HOLE&gt;</code>.
+  The content of <code>&lt;HOLE&gt;</code> must either be: <code>TYPM[N]</code>, <code>TYPO</code>, or <code>TYPELEM[&lt;HOLE&gt;]</code>.</li><li><code>~SIZE[&lt;HOLE&gt;]</code>: The number of bits needed to encode the type represented by <code>&lt;HOLE&gt;</code>.
+  The content of <code>&lt;HOLE&gt;</code> must either be: <code>TYPM[N]</code>, <code>TYPO</code>, or <code>TYPELEM[&lt;HOLE&gt;]</code>.</li><li><code>~IF &lt;CONDITION&gt; ~THEN &lt;THEN&gt; ~ELSE &lt;ELSE&gt; ~FI</code>: renders the &lt;ELSE&gt;
+  part when &lt;CONDITION&gt; evaluates to <em>0</em>, and renders the &lt;THEN&gt; in all
+  other cases. Valid <code>&lt;CONDITION&gt;</code>s are <code>~LENGTH[&lt;HOLE&gt;]</code>, <code>~SIZE[&lt;HOLE&gt;]</code>,
+  <code>~DEPTH[&lt;HOLE&gt;]</code>, and <code>~VIVADO</code>.</li><li><code>~VIVADO</code>: <em>1</em> when C&#955;aSH compiler is invoked with the <code>-clash-xilinx</code> or
+  <code>-clash-vivado</code> flag. To be used with in an <code>~IF .. ~THEN .. ~ElSE .. ~FI</code>
+  statement.</li><li><code>~FROMBV[&lt;HOLE&gt;][&lt;TYPE&gt;]</code>: create conversion code that so that the
+  expression in <code>&lt;HOLE&gt;</code> is converted to a bit vector (<code>std_logic_vector</code>).
+  The <code>&lt;TYPE&gt;</code> hole indicates the type of the expression and must be either
+  <code>~TYP[N]</code>, <code>~TYPO</code>, or <code>~TYPELEM[&lt;HOLE&gt;]</code>.</li><li><code>~TOBV[&lt;HOLE&gt;][&lt;TYPE&gt;]</code>: create conversion code that so that the
+  expression in <code>&lt;HOLE&gt;</code>, which has a bit vector (<code>std_logic_vector</code>) type, is
+  converted to type indicated by <code>&lt;TYPE&gt;</code>. The <code>&lt;TYPE&gt;</code> hole indicates the
+  must be either <code>~TYP[N]</code>, <code>~TYPO</code>, or <code>~TYPELEM[&lt;HOLE&gt;]</code>.</li></ul><p>Some final remarks to end this section: VHDL primitives are there to instruct the
+C&#955;aSH compiler to use the given VHDL template, instead of trying to do normal
+synthesis. As a consequence you can use constructs inside the Haskell
+definitions that are normally not synthesizable by the C&#955;aSH compiler. However,
+VHDL primitives do not give us <em>co-simulation</em>: where you would be able to
+simulate VHDL and Haskell in a <em>single</em> environment. If you still want to
+simulate your design in Haskell, you will have to describe, in a cycle- and
+bit-accurate way, the behaviour of that (potentially complex) IP you are trying
+to include in your design.</p><p>Perhaps in the future, someone will figure out how to connect the two simulation
+worlds, using e.g. VHDL's foreign function interface VHPI.</p></div><h3 id="g:15">Verilog primitives</h3><div class="doc"><p>For those who are interested, the equivalent Verilog primitives are:</p><pre>{ &quot;BlackBox&quot; :
+  { &quot;name&quot;      : &quot;CLaSH.Sized.Internal.Signed.*#&quot;
+  , &quot;templateE&quot; : &quot;~ARG[1] * ~ARG[2]&quot;
+  }
+}
+</pre><p>and</p><pre>{ &quot;BlackBox&quot; :
+    { &quot;name&quot; : &quot;CLaSH.Prelude.BlockRam.blockRam#&quot;
+    , &quot;type&quot; :
+&quot;blockRam# :: KnownNat n       -- ARG[0]
+           =&gt; SClock clk       -- clk,  ARG[1]
+           -&gt; Vec n a          -- init, ARG[2]
+           -&gt; Signal' clk Int  -- rd,   ARG[3]
+           -&gt; Signal' clk Bool -- wren, ARG[4]
+           -&gt; Signal' clk Int  -- wr,   ARG[5]
+           -&gt; Signal' clk a    -- din,  ARG[6]
+           -&gt; Signal' clk a&quot;
+    , &quot;templateD&quot; :
+&quot;// blockRam begin
+reg ~TYPO ~GENSYM[RAM][0] [0:~LIT[0]-1];
+reg ~TYPO ~GENSYM[dout][1];
+
+reg ~TYP[2] ~GENSYM[ram_init][2];
+integer ~GENSYM[i][3];
+initial begin
+  ~SYM[2] = ~ARG[2];
+  for (~SYM[3]=0; ~SYM[3] &lt; ~LIT[0]; ~SYM[3] = ~SYM[3] + 1) begin
+    ~SYM[0][~LIT[0]-1-~SYM[3]] = ~SYM[2][~SYM[3]*~SIZE[~TYPO]+:~SIZE[~TYPO]];
+  end
+end
+
+always @(posedge ~CLK[1]) begin : ~GENSYM[~COMPNAME_blockRam][4]
+  if (~ARG[4]) begin
+    ~SYM[0][~ARG[5]] &lt;= ~ARG[6];
+  end
+  ~SYM[1] &lt;= ~SYM[0][~ARG[3]];
+end
+
+assign ~RESULT = ~SYM[1];
+// blockRam end&quot;
+    }
+}
+</pre></div><h3 id="g:16">SystemVerilog primitives</h3><div class="doc"><p>And the equivalent SystemVerilog primitives are:</p><pre>{ &quot;BlackBox&quot; :
+  { &quot;name&quot;      : &quot;CLaSH.Sized.Internal.Signed.*#&quot;
+  , &quot;templateE&quot; : &quot;~ARG[1] * ~ARG[2]&quot;
+  }
+}
+</pre><p>and</p><pre>{ &quot;BlackBox&quot; :
+    { &quot;name&quot; : &quot;CLaSH.Prelude.BlockRam.blockRam#&quot;
+    , &quot;type&quot; :
+&quot;blockRam# :: KnownNat n       -- ARG[0]
+           =&gt; SClock clk       -- clk,  ARG[1]
+           -&gt; Vec n a          -- init, ARG[2]
+           -&gt; Signal' clk Int  -- rd,   ARG[3]
+           -&gt; Signal' clk Bool -- wren, ARG[4]
+           -&gt; Signal' clk Int  -- wr,   ARG[5]
+           -&gt; Signal' clk a    -- din,  ARG[6]
+           -&gt; Signal' clk a&quot;
+    , &quot;templateD&quot; :
+&quot;// blockRam begin
+~SIGD[~GENSYM[RAM][0]][2];
+logic [~SIZE[~TYP[6]]-1:0] ~GENSYM[dout][1];
+initial begin
+  ~SYM[0] = ~LIT[2];
+end
+always @(posedge ~CLK[1]) begin : ~GENSYM[~COMPNAME_blockRam][2]
+  if (~ARG[4]) begin
+    ~SYM[0][~ARG[5]] &lt;= ~TOBV[~ARG[6]][~TYP[6]];
+  end
+  ~SYM[1] &lt;= ~SYM[0][~ARG[3]];
+end
+assign ~RESULT = ~FROMBV[~SYM[1]][~TYP[6]];
+// blockRam end&quot;
+    }
+  }
+</pre></div><h1 id="g:17">Conclusion</h1><div class="doc"><p>For now, this is the end of this tutorial. We will be adding updates over time,
+so check back from time to time. For now, we recommend that you continue with
+exploring the <a href="CLaSH-Prelude.html">CLaSH.Prelude</a> module, and get a better understanding of the
+capabilities of C&#955;aSH in the process.</p></div><h1 id="g:18">Troubleshooting</h1><div class="doc"><p>A list of often encountered errors and their solutions:</p><ul><li><p><strong>Type error: Couldn't match expected type <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (a,b)</code> with actual type</strong>
+  <strong><code>(<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> b)</code></strong>:</p><p>Signals of product types and product types (to which tuples belong) of
+signals are <strong>isomorphic</strong> due to synchronisity principle, but are not
+(structurally) equal. Use the <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> function to convert from a product type
+to the signal type. So if your code which gives the error looks like:</p><pre>... = f a b (c,d)
+</pre><p>add the <code>bundle'</code> function like so:</p><pre>... = f a b (<code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> (c,d))
+</pre><p>Product types supported by <code><a href="CLaSH-Signal-Bundle.html#v:bundle">bundle</a></code> are:</p><ul><li>All tuples until and including 8-tuples</li><li>The <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor type</li></ul><p>NB: Use <code>bundle'</code> when you are using explicitly clocked <code><code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code></code>s</p></li><li><p><strong>Type error: Couldn't match expected type <code>(<code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a, <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> b)</code> with</strong>
+  <strong> actual type <code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (a,b)</code></strong>:</p><p>Product types (to which tuples belong) of signals and signals of product
+types are <strong>isomorphic</strong> due to synchronicity principle, but are not
+(structurally) equal. Use the <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> function to convert from a signal
+type to the product type. So if your code which gives the error looks like:</p><pre>(c,d) = f a b
+</pre><p>add the <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> function like so:</p><pre>(c,d) = <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> (f a b)
+</pre><p>Product types supported by <code><a href="CLaSH-Signal-Bundle.html#v:unbundle">unbundle</a></code> are:</p><ul><li>All tuples until and including 8-tuples</li><li>The <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor type</li></ul><p>NB: Use <code>unbundle'</code> when you are using explicitly clocked <code><code><a href="CLaSH-Signal-Internal.html#t:Signal-39-">Signal'</a></code></code>s</p></li><li><p><strong>CLaSH.Netlist(..): Not in normal form: &lt;REASON&gt;: &lt;EXPR&gt;</strong>:</p><p>A function could not be transformed into the expected normal form. This
+usually means one of the following:</p><ul><li>The <code>topEntity</code> has residual polymorphism.</li><li>The <code>topEntity</code> has higher-order arguments, or a higher-order result.</li><li>You are using types which cannot be represented in hardware.</li></ul><p>The solution for all the above listed reasons is quite simple: remove them.
+That is, make sure that the <code>topEntity</code> is completely monomorphic and
+first-order. Also remove any variables and constants/literals that have a
+non-representable type, see <a href="#unsupported">Unsupported Haskell features</a> to
+find out which types are not representable.</p></li><li><p><strong>CLaSH.Normalize(94): Expr belonging to bndr: &lt;FUNCTION&gt; remains</strong>
+  <strong>recursive after normalization</strong>:</p><ul><li>If you actually wrote a recursive function, rewrite it to a non-recursive
+  one using e.g. one of the higher-order functions in <a href="CLaSH-Sized-Vector.html">CLaSH.Sized.Vector</a> :-)</li><li>You defined a recursively defined value, but left it polymorphic:</li></ul><pre>topEntity x y = acc
+  where
+    acc = <code><a href="CLaSH-Signal.html#v:register">register</a></code> 3 (acc + x * y)
+</pre><p>The above function, works for any number-like type. This means that <code>acc</code> is
+a recursively defined <strong>polymorphic</strong> value. Adding a monomorphic type
+annotation makes the error go away:</p><pre>topEntity :: <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 8) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 8) -&gt; <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> (<code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 8)
+topEntity x y = acc
+  where
+    acc = <code><a href="CLaSH-Signal.html#v:register">register</a></code> 3 (acc + x * y)
+</pre><p>Or, alternatively:</p><pre>topEntity x y = acc
+  where
+    acc = <code><a href="CLaSH-Signal.html#v:register">register</a></code> (3 :: <code><a href="CLaSH-Sized-Internal-Signed.html#t:Signed">Signed</a></code> 8) (acc + x * y)
+</pre></li><li><p><strong>CLaSH.Normalize.Transformations(155): InlineNonRep: &lt;FUNCTION&gt; already</strong>
+  <strong>inlined 100 times in:&lt;FUNCTION&gt;, &lt;TYPE&gt;</strong>:</p><p>You left the <code>topEntity</code> function polymorphic or higher-order: use
+<code>:t topEntity</code> to check if the type is indeed polymorphic or higher-order.
+If it is, add a monomorphic type signature, and / or supply higher-order
+arguments.</p></li><li><p><strong>Can't make testbench for: &lt;LONG_VERBATIM_COMPONENT_DESCRIPTION&gt;</strong>:</p><ul><li>Don't worry, it's actually only a warning.</li><li>The <code>topEntity</code> function does <strong>not</strong> have exactly 1 argument. If your
+  <code>topEntity</code> has no arguments, you're out of luck for now. If it has
+  multiple arguments, consider bundling them in a tuple.</li></ul></li><li><p><strong>&lt;*** Exception: &lt;&lt;loop&gt;&gt;</strong> or &quot;blinking cursor&quot;</p><p>You are using value-recursion, but one of the <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor functions that you
+are using is too <em>strict</em> in one of the recursive arguments. For example:</p><pre>-- Bubble sort for 1 iteration
+sortV xs = <code><a href="CLaSH-Sized-Vector.html#v:map">map</a></code> fst sorted <code>:&lt;</code> (snd (<code><a href="CLaSH-Sized-Vector.html#v:last">last</a></code> sorted))
+ where
+   lefts  = <code><a href="CLaSH-Sized-Vector.html#v:head">head</a></code> xs :&gt; <code><a href="CLaSH-Sized-Vector.html#v:map">map</a></code> snd (<code><a href="CLaSH-Sized-Vector.html#v:init">init</a></code> sorted)
+   rights = <code><a href="CLaSH-Sized-Vector.html#v:tail">tail</a></code> xs
+   sorted = <code><a href="CLaSH-Sized-Vector.html#v:zipWith">zipWith</a></code> compareSwapL lefts rights
+
+-- Compare and swap
+compareSwapL a b = if a &lt; b then (a,b)
+                            else (b,a)
+</pre><p>Will not terminate because <code><a href="CLaSH-Sized-Vector.html#v:zipWith">zipWith</a></code> is too strict in its second argument.</p><p>In this case, adding <code><a href="CLaSH-Sized-Vector.html#v:lazyV">lazyV</a></code> on <code><a href="CLaSH-Sized-Vector.html#v:zipWith">zipWith</a></code>s second argument:</p><pre>sortVL xs = <code><a href="CLaSH-Sized-Vector.html#v:map">map</a></code> fst sorted <code>:&lt;</code> (snd (<code><a href="CLaSH-Sized-Vector.html#v:last">last</a></code> sorted))
+ where
+   lefts  = <code><a href="CLaSH-Sized-Vector.html#v:head">head</a></code> xs :&gt; map snd (<code><a href="CLaSH-Sized-Vector.html#v:init">init</a></code> sorted)
+   rights = <code><a href="CLaSH-Sized-Vector.html#v:tail">tail</a></code> xs
+   sorted = <code><a href="CLaSH-Sized-Vector.html#v:zipWith">zipWith</a></code> compareSwapL (<code><a href="CLaSH-Sized-Vector.html#v:lazyV">lazyV</a></code> lefts) rights
+</pre><p>Results in a successful computation:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>sortVL (4 :&gt; 1 :&gt; 2 :&gt; 3 :&gt; Nil)
+</code></strong>&lt;1,2,3,4&gt;
+</pre></li></ul></div><h1 id="g:19">Limitations of C&#955;aSH</h1><div class="doc"><p><a id="limitations"></a>
+Here is a list of Haskell features for which the C&#955;aSH compiler has only
+<em>limited</em> support (for now):</p><ul><li><p><strong>Recursively defined functions</strong></p><p>At first hand, it seems rather bad that a compiler for a functional language
+cannot synthesize recursively defined functions to circuits. However, when
+viewing your functions as a <em>structural</em> specification of a circuit, this
+<em>feature</em> of the C&#955;aSH compiler makes sense. Also, only certain types of
+recursion are considered non-synthesisable; recursively defined values are
+for example synthesisable: they are (often) synthesized to feedback loops.</p><p>Let us distinguish between three variants of recursion:</p><ul><li><p><strong>Dynamic data-dependent recursion</strong></p><p>As demonstrated in this definition of a function that calculates the
+n'th Fibbonacci number:</p><pre>fibR 0 = 0
+fibR 1 = 1
+fibR n = fibR (n-1) + fibR (n-2)
+</pre><p>To get the first 10 numbers, we do the following:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>import qualified Data.List as L
+</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>L.map fibR [0..9]
+</code></strong>[0,1,1,2,3,5,8,13,21,34]
+</pre><p>The <code>fibR</code> function is not synthesizable by the C&#955;aSH compiler, because,
+when we take a <em>structural</em> view, <code>fibR</code> describes an infinitely deep
+structure.</p><p>In principal, descriptions like the above could be synthesized to a
+circuit, but it would have to be a <em>sequential</em> circuit. Where the most
+general synthesis would then require a stack. Such a synthesis approach
+is also known as <em>behavioural</em> synthesis, something which the C&#955;aSH
+compiler simply does not do. One reason that C&#955;aSH does not do this is
+because it does not fit the paradigm that only functions working on
+values of type <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> result in sequential circuits, and all other
+(non higher-order) functions result in combinational circuits. This
+paradigm gives the designer the most straightforward mapping from the
+original Haskell description to generated circuit, and thus the greatest
+control over the eventual size of the circuit and longest propagation
+delay.</p></li><li><p><strong>Value-recursion</strong></p><p>As demonstrated in this definition of a function that calculates the
+n'th Fibbonaci number on the n'th clock cycle:</p><pre>fibS = r
+  where r = <code><a href="CLaSH-Signal.html#v:register">register</a></code> 0 r + <code><a href="CLaSH-Signal.html#v:register">register</a></code> 0 (<code><a href="CLaSH-Signal.html#v:register">register</a></code> 1 r)
+</pre><p>To get the first 10 numbers, we do the following:</p><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>sampleN 10 fibS
+</code></strong>[0,1,1,2,3,5,8,13,21,34]
+</pre><p>Unlike the <code>fibR</code> function, the above <code>fibS</code> function <em>is</em> synthesisable
+by the C&#955;aSH compiler. Where the recursively defined (non-function)
+value <em>r</em> is synthesized to a feedback loop containing three registers
+and one adder.</p><p>Note that not all recursively defined values result in a feedback loop.
+An example that uses recursively defined values which does not result
+in a feedback loop is the following function that performs one iteration
+of bubble sort:</p><pre>sortV xs = <code><a href="CLaSH-Sized-Vector.html#v:map">map</a></code> fst sorted :&lt; (snd (<code><a href="CLaSH-Sized-Vector.html#v:last">last</a></code> sorted))
+ where
+   lefts  = <code><a href="CLaSH-Sized-Vector.html#v:head">head</a></code> xs :&gt; <code><a href="CLaSH-Sized-Vector.html#v:map">map</a></code> snd (<code><a href="CLaSH-Sized-Vector.html#v:init">init</a></code> sorted)
+   rights = <code><a href="CLaSH-Sized-Vector.html#v:tail">tail</a></code> xs
+   sorted = <code><a href="CLaSH-Sized-Vector.html#v:zipWith">zipWith</a></code> compareSwapL lefts rights
+</pre><p>Where we can clearly see that <code>lefts</code> and <code>sorted</code> are defined in terms
+of each other. Also the above <code>sortV</code> function <em>is</em> synthesisable.</p></li><li><p><strong>Static/Structure-dependent recursion</strong></p><p>Static, or, structure-dependent recursion is a rather <em>vague</em> concept.
+What we mean by this concept are recursive definitions where a user can
+sensibly imagine that the recursive definition can be completely
+unfolded (all recursion is eliminated) at compile-time in a finite
+amount of time.</p><p>Such definitions would e.g. be:</p><pre>mapV :: (a -&gt; b) -&gt; Vec n a -&gt; Vec n b
+mapV _ Nil         = Nil
+mapV f (Cons x xs) = Cons (f x) (mapV f xs)
+
+topEntity :: Vec 4 Int -&gt; Vec 4 Int
+topEntity = mapV (+1)
+</pre><p>Where one can imagine that a compiler can unroll the definition of
+<code>mapV</code> four times, knowing that the <code>topEntity</code> function applies <code>mapV</code>
+to a <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code> of length 4. Sadly, the compile-time evaluation mechanisms in
+the C&#955;aSH compiler are very poor, and a user-defined function such as
+the <code>mapV</code> function defined above, is <em>currently</em> not synthesisable.
+We <em>do</em> plan to add support for this in the future. In the mean time,
+this poor support for user-defined recursive functions is amortized by
+the fact that the C&#955;aSH compiler has built-in support for the
+higher-order functions defined in <a href="CLaSH-Sized-Vector.html">CLaSH.Sized.Vector</a>. Most regular
+design patterns often encountered in circuit design are captured by the
+higher-order functions in <a href="CLaSH-Sized-Vector.html">CLaSH.Sized.Vector</a>.</p></li></ul></li><li><p><strong>Recursive datatypes</strong></p><p>The C&#955;aSH compiler needs to be able to determine a bit-size for any value
+that will be represented in the eventual circuit. More specifically, we need
+to know the maximum number of bits needed to represent a value. While this
+is trivial for values of the elementary types, sum types, and product types,
+putting a fixed upper bound on recursive types is not (always) feasible.
+This means that the ubiquitous list type is unsupported! The only recursive
+type that is currently supported by the C&#955;aSH compiler is the <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor type,
+for which the compiler has hard-coded knowledge.</p><p>For &quot;easy&quot; <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor literals you should use Template Haskell splices and
+the <code><a href="CLaSH-Sized-Vector.html#v:listToVecTH">listToVecTH</a></code> <em>meta</em>-function that as we have seen earlier in this tutorial.</p></li><li><p><strong>GADT pattern matching</strong></p><p>While pattern matching for regular ADTs is supported, pattern matching for
+GADTs is <strong>not</strong>. The constructors <code>Cons</code> and <code><a href="CLaSH-Sized-Vector.html#v:Nil">Nil</a></code> of the <code><a href="CLaSH-Sized-Vector.html#t:Vec">Vec</a></code>tor type,
+which is also a GADT, are <strong>no</strong> exception! However, you can use the
+convenient <code>:&gt;</code> pattern synonym.</p></li><li><p><strong>Floating point types</strong></p><p>There is no support for the <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Float">Float</a></code> and <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Double">Double</a></code> types, if you need numbers
+with a <em>fractional</em> part you can use the <code><a href="CLaSH-Sized-Fixed.html#t:Fixed">Fixed</a></code> point type.</p><p>As to why there is no support for these floating point types:</p><ol><li>In order to achieve reasonable operating frequencies, arithmetic
+        circuits for floating point data types must be pipelined.</li><li><p>Haskell's primitive arithmetic operators on floating point data types,
+        such as <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/ghc-prim-0.5.0.0/GHC-Prim.html#v:plusFloat-35-">plusFloat#</a></code></p><pre><strong>plusFloat#</strong> :: <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/ghc-prim-0.5.0.0/GHC-Prim.html#t:Float-35-">Float#</a></code> -&gt; <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/ghc-prim-0.5.0.0/GHC-Prim.html#t:Float-35-">Float#</a></code> -&gt; <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/ghc-prim-0.5.0.0/GHC-Prim.html#t:Float-35-">Float#</a></code>
+</pre><p>which underlie <code><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Float">Float</a></code></code>'s <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Num">Num</a></code> instance, must be implemented as
+purely combinational circuits according to their type. Remember,
+sequential circuits operate on values of type &quot;<code><code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> a</code>&quot;.</p></li></ol><p>Although it is possible to implement purely combinational (not pipelined)
+arithmetic circuits for floating point data types, the circuit would be
+unreasonable slow. And so, without synthesis possibilities for the basic
+arithmetic operations, there is no point in supporting the floating point
+data types.</p></li><li><p><strong>Haskell primitive types</strong></p><p>Only the following primitive Haskell types are supported:</p><ul><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int">Int</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int8">Int8</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int16">Int16</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int32">Int32</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int64">Int64</a></code> (not available when compiling with <code>-clash-intwidth=32</code> on a 64-bit machine)</li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word">Word</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word8">Word8</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word16">Word16</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word32">Word32</a></code></li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word64">Word64</a></code> (not available when compiling with <code>-clash-intwidth=32</code> on a 64-bit machine)</li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Char.html#t:Char">Char</a></code></li></ul><p>There are several aspects of which you should take note:</p><ul><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int">Int</a></code> and <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word">Word</a></code> are represented by the same number of bits as is
+        native for the architecture of the computer on which the C&#955;aSH
+        compiler is executed. This means that if you are working on a 64-bit
+        machine, <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int">Int</a></code> and <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word">Word</a></code> will be 64-bit. This might be problematic
+        when you are working in a team, and one designer has a 32-bit
+        machine, and the other has a 64-bit machine. In general, you should
+        be avoiding <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int">Int</a></code> in such cases, but as a band-aid solution, you can
+        force the C&#955;aSH compiler to use a specific bit-width for <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int">Int</a></code> and
+        <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word">Word</a></code> using the <code>-clash-intwidth=N</code> flag, where <em>N</em> must either be
+        <em>32</em> or <em>64</em>.</li><li>When you use the <code>-clash-intwidth=32</code> flag on a <em>64-bit</em> machine,
+        the <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word64">Word64</a></code> and <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int64">Int64</a></code> types <em>cannot</em> be translated. This
+        restriction does <em>not</em> apply to the other three combinations of
+        <code>-clash-intwidth</code> flag and machine type.</li><li><p>The translation of <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code> is not meaning-preserving. <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code> in
+        Haskell is an arbitrary precision integer, something that cannot
+        be represented in a statically known number of bits. In the C&#955;aSH
+        compiler, we chose to represent <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code> by the same number of bits
+        as we do for <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Int.html#t:Int">Int</a></code> and <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Data-Word.html#t:Word">Word</a></code>. As you have read in a previous
+        bullet point, this number of bits is either 32 or 64, depending on
+        the architecture of the machine the C&#955;aSH compiler is running on, or
+        the setting of the <code>-clash-intwidth</code> flag.</p><p>Consequently, you should use <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code> with due diligence; be
+especially careful when using <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#v:fromIntegral">fromIntegral</a></code> as it does a conversion
+via <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code>. For example:</p><pre>signedToUnsigned :: Signed 128 -&gt; Unsigned 128
+signedToUnsigned = fromIntegral</pre><p>can either lose the top 64 or 96 bits depending on whether <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Prelude.html#t:Integer">Integer</a></code>
+is represented by 64 or 32 bits. Instead, when doing such conversions,
+you should use <code><a href="CLaSH-Class-BitPack.html#v:bitCoerce">bitCoerce</a></code>:</p><pre>signedToUnsigned :: Signed 128 -&gt; Unsigned 128
+signedToUnsigned = bitCoerce</pre></li></ul></li><li><p><strong>Side-effects: <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/System-IO.html#t:IO">IO</a></code>, <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Monad-ST.html#t:ST">ST</a></code>, etc.</strong></p><p>There is no support for side-effecting computations such as those in the
+<code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/System-IO.html#t:IO">IO</a></code> or <code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Monad-ST.html#t:ST">ST</a></code> monad. There is also no support for Haskell's
+<a href="http://www.haskell.org/haskellwiki/Foreign_Function_Interface">FFI</a>.</p></li></ul></div><h1 id="g:20">C&#955;aSH vs Lava</h1><div class="doc"><p>In Haskell land the most well-known way of describing digital circuits is the
+Lava family of languages:</p><ul><li><a href="http://hackage.haskell.org/package/chalmers-lava2000">Chalmers Lava</a></li><li><a href="http://hackage.haskell.org/package/xilinx-lava">Xilinx Lava</a></li><li><a href="http://hackage.haskell.org/package/york-lava">York Lava</a></li><li><a href="http://hackage.haskell.org/package/kansas-lava">Kansas Lava</a></li></ul><p>The big difference between C&#955;aSH and Lava is that C&#955;aSH uses a &quot;standard&quot;
+compiler (static analysis) approach towards synthesis, where Lava is an
+embedded domain specific language. One downside of static analysis vs. the
+embedded language approach is already clearly visible: synthesis of recursive
+descriptions does not come for &quot;free&quot;. This will be implemented in C&#955;aSH in
+due time, but that doesn't help the circuit designer right now. As already
+mentioned earlier, the poor support for recursive functions is amortized by
+the built-in support for the higher-order in <a href="CLaSH-Sized-Vector.html">CLaSH.Sized.Vector</a>.</p><p>The big upside of C&#955;aSH and its static analysis approach is that C&#955;aSH can
+do synthesis of &quot;normal&quot; functions: there is no forced encasing datatype (often
+called <em>Signal</em> in Lava) on all the arguments and results of a synthesizable
+function. This enables the following features not available to Lava:</p><ul><li>Automatic synthesis for user-defined ADTs</li><li>Synthesis of all choice constructs (pattern matching, guards, etc.)</li><li><code><a href="file:///Library/Frameworks/GHC.framework/Versions/8.0.2-x86_64/usr/share/doc/ghc-8.0.2/html/libraries/base-4.9.1.0/Control-Applicative.html#t:Applicative">Applicative</a></code> instance for the <code><a href="CLaSH-Signal.html#t:Signal">Signal</a></code> type</li><li>Working with &quot;normal&quot; functions permits the use of e.g. the
+  <code><a href="file:///Library/Haskell/ghc-8.0.2-x86_64/lib/mtl-2.2.1/doc/html/Control-Monad-State-Lazy.html#v:State">State</a></code> monad to describe the functionality of a
+  circuit.</li></ul><p>Although there are Lava alternatives to some of the above features (e.g.
+first-class patterns to replace pattern matching) they are not as &quot;beautiful&quot;
+and / or easy to use as the standard Haskell features.</p></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.17.3</p></div></body></html>

@@ -1,0 +1,30 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40238/reflection-2.1.2'
+Configuring reflection-2.1.2...
+Building reflection-2.1.2...
+Preprocessing library reflection-2.1.2...
+[1 of 1] Compiling Data.Reflection  ( fast/Data/Reflection.hs, dist/dist-sandbox-a79a4d0f/build/Data/Reflection.o )
+[1 of 1] Compiling Data.Reflection  ( fast/Data/Reflection.hs, dist/dist-sandbox-a79a4d0f/build/Data/Reflection.p_o )
+Running Haddock for reflection-2.1.2...
+Preprocessing library reflection-2.1.2...
+Haddock coverage:
+  63% ( 19 / 30) in 'Data.Reflection'
+  Missing documentation for:
+    Reifies (fast/Data/Reflection.hs:161)
+    Z (fast/Data/Reflection.hs:248)
+    D (fast/Data/Reflection.hs:249)
+    SD (fast/Data/Reflection.hs:250)
+    PD (fast/Data/Reflection.hs:251)
+    ReifiedMonoid (fast/Data/Reflection.hs:554)
+    ReflectedMonoid (fast/Data/Reflection.hs:563)
+    reifyMonoid (fast/Data/Reflection.hs:568)
+    ReifiedApplicative (fast/Data/Reflection.hs:597)
+    ReflectedApplicative (fast/Data/Reflection.hs:599)
+    reifyApplicative (fast/Data/Reflection.hs:614)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/reflection/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-reflection-2.112672485902051724831.2
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/reflection-2.1.2-1Oix9U9tVVU4sCEhxeh8Kr
+Registering reflection-2.1.2...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40238/reflection-2.1.2'

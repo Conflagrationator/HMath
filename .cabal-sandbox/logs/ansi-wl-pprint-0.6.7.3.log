@@ -1,0 +1,24 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14740/ansi-wl-pprint-0.6.7.3'
+Configuring ansi-wl-pprint-0.6.7.3...
+Building ansi-wl-pprint-0.6.7.3...
+Preprocessing library ansi-wl-pprint-0.6.7.3...
+[1 of 1] Compiling Text.PrettyPrint.ANSI.Leijen ( Text/PrettyPrint/ANSI/Leijen.hs, dist/dist-sandbox-a79a4d0f/build/Text/PrettyPrint/ANSI/Leijen.o )
+[1 of 1] Compiling Text.PrettyPrint.ANSI.Leijen ( Text/PrettyPrint/ANSI/Leijen.hs, dist/dist-sandbox-a79a4d0f/build/Text/PrettyPrint/ANSI/Leijen.p_o )
+Running Haddock for ansi-wl-pprint-0.6.7.3...
+Preprocessing library ansi-wl-pprint-0.6.7.3...
+Haddock coverage:
+  96% (129 /134) in 'Text.PrettyPrint.ANSI.Leijen'
+  Missing documentation for:
+    bool (Text/PrettyPrint/ANSI/Leijen.hs:506)
+    column (Text/PrettyPrint/ANSI/Leijen.hs:843)
+    columns (Text/PrettyPrint/ANSI/Leijen.hs:847)
+    nesting (Text/PrettyPrint/ANSI/Leijen.hs:843)
+    width (Text/PrettyPrint/ANSI/Leijen.hs:646)
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/ansi-wl-pprint/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-ansi-wl-pprint-0.6.713585809791624379149.3
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/ansi-wl-pprint-0.6.7.3-ECbwy3QeG7uHfxjdBWgTjf
+Registering ansi-wl-pprint-0.6.7.3...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14740/ansi-wl-pprint-0.6.7.3'

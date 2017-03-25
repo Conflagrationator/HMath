@@ -1,0 +1,6 @@
+clash-prelude -any
+ghc-typelits-natnormalise -any
+tasty-hunit -any
+tasty-quickcheck -any
+tasty -any
+hspec -any

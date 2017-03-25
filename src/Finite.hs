@@ -75,7 +75,7 @@ showScientific (Finite a m) = lead ++ decimals ++ "e" ++ show exponent
 ----------------------------------------------------------------
 
 instance Num Finite where
-    am@(Finite a m) + bn@(Finite b n) = roundToPrecision (u *^ lowestExpo) (digits u - diff)
+    am@(Finite a m) + bn@(Finite b n) = roundToPrecision (u *^ lowestExpo) (digits u - diff) -- FIXME: rounding error on associativity
       where
         lowestExpo = min m n
         highestExpo = max m n
@@ -84,7 +84,7 @@ instance Num Finite where
     
     am - bn = am + (-bn)
     
-    am@(Finite a m) * bn@(Finite b n) = roundToPrecision ((a * b) *^ (m + n)) lowestPrecision
+    am@(Finite a m) * bn@(Finite b n) = roundToPrecision ((a * b) *^ (m + n)) lowestPrecision -- FIXME: rounding error on associativity
       where
         lowestPrecision = min (sigfigs am) (sigfigs bn)
     
@@ -112,8 +112,14 @@ fromIntegerMatchingPrecision a n = fromIntegerWithPrecision a (sigfigs n)
 -- EQUATABILITY & ORDERABILITY
 ----------------------------------------------------------------
 
+-- | tests if two finites have the same value
 instance Eq Finite where
-    (Finite a m) == (Finite b n) = a == b && m == n -- FIXME: redefine based on value, different sigfigs can mess this up
+    (Finite a m) == (Finite b n)
+        | n < m = a*10^(m-n) == b
+        | otherwise = a == b*10^(n-m)
+
+-- | tests if two finites are exactly the same
+(Finite a m) === (Finite b n) = a == b && m == n
 
 instance Ord Finite where
     compare (Finite a m) (Finite b n) = compare (a*10^(m-lowestExpo)) (b*10^(n-lowestExpo))
@@ -124,9 +130,10 @@ instance Ord Finite where
 -- FRACTIONALNESS
 ----------------------------------------------------------------
 
-instance Fractional Finite where -- FIXME not working with exponents > 0
-    am@(Finite a m) / bn@(Finite b n) = roundToPrecision (((a*10^lowestPrecision) `div` b) *^- lowestPrecision) lowestPrecision
+instance Fractional Finite where
+    am@(Finite a m) / bn@(Finite b n) = roundToPrecision (((a*10^(db+1)) `div` b) *^ (m-n-db-1)) lowestPrecision
       where
+        db = digits b
         lowestPrecision = min (sigfigs am) (sigfigs bn)
 
     fromRational r = (fromInteger (numerator r)) / (fromInteger (denominator r)) -- ^ Assumes IEEE Double precision
@@ -159,6 +166,11 @@ instance RealFrac Finite where
 -- root :: Finite -> Finite -> Finite
 -- root (Finite a m) (Finite b n) =
 
+-- | Logarithms
+
+-- log :: Finite -> Finite -> Finite
+-- log (Finite a m) (Finite b n) = 
+
 ----------------------------------------------------------------
 -- OTHER FUNCTIONS
 ----------------------------------------------------------------
@@ -173,7 +185,6 @@ roundToPrecision am@(Finite a m) p
       d = digits a
       r = if a `div` 10^(d-p-1) `mod` 10 >= 5 then 1 else 0 -- add 1 to the number if the digit after the precision is >= 5
 
-      
 ----------------------------------------------------------------
 -- MATHEMATICAL CONSTANTS
 ----------------------------------------------------------------

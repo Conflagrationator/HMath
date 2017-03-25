@@ -1,0 +1,67 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-11818/megaparsec-5.2.0'
+Configuring megaparsec-5.2.0...
+Building megaparsec-5.2.0...
+Preprocessing library megaparsec-5.2.0...
+[ 1 of 14] Compiling Text.Megaparsec.Pos ( Text/Megaparsec/Pos.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Pos.o )
+[ 2 of 14] Compiling Text.Megaparsec.Error ( Text/Megaparsec/Error.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Error.o )
+[ 3 of 14] Compiling Text.Megaparsec.Prim ( Text/Megaparsec/Prim.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Prim.o )
+[ 4 of 14] Compiling Text.Megaparsec.String ( Text/Megaparsec/String.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/String.o )
+[ 5 of 14] Compiling Text.Megaparsec.Text ( Text/Megaparsec/Text.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Text.o )
+[ 6 of 14] Compiling Text.Megaparsec.Text.Lazy ( Text/Megaparsec/Text/Lazy.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Text/Lazy.o )
+[ 7 of 14] Compiling Text.Megaparsec.Combinator ( Text/Megaparsec/Combinator.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Combinator.o )
+[ 8 of 14] Compiling Text.Megaparsec.Expr ( Text/Megaparsec/Expr.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Expr.o )
+[ 9 of 14] Compiling Text.Megaparsec.Perm ( Text/Megaparsec/Perm.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Perm.o )
+[10 of 14] Compiling Text.Megaparsec.Char ( Text/Megaparsec/Char.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Char.o )
+[11 of 14] Compiling Text.Megaparsec.Lexer ( Text/Megaparsec/Lexer.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Lexer.o )
+[12 of 14] Compiling Text.Megaparsec.ByteString.Lazy ( Text/Megaparsec/ByteString/Lazy.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/ByteString/Lazy.o )
+[13 of 14] Compiling Text.Megaparsec.ByteString ( Text/Megaparsec/ByteString.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/ByteString.o )
+[14 of 14] Compiling Text.Megaparsec  ( Text/Megaparsec.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec.o )
+[ 1 of 14] Compiling Text.Megaparsec.Pos ( Text/Megaparsec/Pos.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Pos.p_o )
+[ 2 of 14] Compiling Text.Megaparsec.Error ( Text/Megaparsec/Error.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Error.p_o )
+[ 3 of 14] Compiling Text.Megaparsec.Prim ( Text/Megaparsec/Prim.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Prim.p_o )
+[ 4 of 14] Compiling Text.Megaparsec.String ( Text/Megaparsec/String.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/String.p_o )
+[ 5 of 14] Compiling Text.Megaparsec.Text ( Text/Megaparsec/Text.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Text.p_o )
+[ 6 of 14] Compiling Text.Megaparsec.Text.Lazy ( Text/Megaparsec/Text/Lazy.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Text/Lazy.p_o )
+[ 7 of 14] Compiling Text.Megaparsec.Combinator ( Text/Megaparsec/Combinator.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Combinator.p_o )
+[ 8 of 14] Compiling Text.Megaparsec.Expr ( Text/Megaparsec/Expr.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Expr.p_o )
+[ 9 of 14] Compiling Text.Megaparsec.Perm ( Text/Megaparsec/Perm.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Perm.p_o )
+[10 of 14] Compiling Text.Megaparsec.Char ( Text/Megaparsec/Char.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Char.p_o )
+[11 of 14] Compiling Text.Megaparsec.Lexer ( Text/Megaparsec/Lexer.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/Lexer.p_o )
+[12 of 14] Compiling Text.Megaparsec.ByteString.Lazy ( Text/Megaparsec/ByteString/Lazy.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/ByteString/Lazy.p_o )
+[13 of 14] Compiling Text.Megaparsec.ByteString ( Text/Megaparsec/ByteString.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec/ByteString.p_o )
+[14 of 14] Compiling Text.Megaparsec  ( Text/Megaparsec.hs, dist/dist-sandbox-a79a4d0f/build/Text/Megaparsec.p_o )
+Running Haddock for megaparsec-5.2.0...
+Preprocessing library megaparsec-5.2.0...
+Haddock coverage:
+ 100% ( 14 / 14) in 'Text.Megaparsec.Pos'
+ 100% ( 10 / 10) in 'Text.Megaparsec.Error'
+ 100% ( 32 / 32) in 'Text.Megaparsec.Prim'
+ 100% (  2 /  2) in 'Text.Megaparsec.String'
+ 100% (  2 /  2) in 'Text.Megaparsec.Text'
+ 100% (  2 /  2) in 'Text.Megaparsec.Text.Lazy'
+ 100% ( 17 / 17) in 'Text.Megaparsec.Combinator'
+ 100% (  3 /  3) in 'Text.Megaparsec.Expr'
+ 100% (  7 /  7) in 'Text.Megaparsec.Perm'
+ 100% ( 39 / 39) in 'Text.Megaparsec.Char'
+ 100% ( 28 / 28) in 'Text.Megaparsec.Lexer'
+ 100% (  2 /  2) in 'Text.Megaparsec.ByteString.Lazy'
+ 100% (  2 /  2) in 'Text.Megaparsec.ByteString'
+ 100% (118 /118) in 'Text.Megaparsec'
+Warning: Text.Megaparsec.Error: could not find link destinations for:
+    mergeError
+Warning: Text.Megaparsec.Prim: could not find link destinations for:
+    dbgLog Hints Consumption Reply Result unfold
+Warning: Text.Megaparsec.Char: could not find link destinations for:
+    ~
+Warning: Text.Megaparsec.Lexer: could not find link destinations for:
+    ~
+Warning: Text.Megaparsec: could not find link destinations for:
+    ~
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/megaparsec/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-megaparsec-5.2144128232716531729.0
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/megaparsec-5.2.0-12w5ZZa6fTXBkoXrcX6pC0
+Registering megaparsec-5.2.0...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-11818/megaparsec-5.2.0'

@@ -1,0 +1,24 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/ghc-typelits-knownnat-0.2.3'
+Configuring ghc-typelits-knownnat-0.2.3...
+Building ghc-typelits-knownnat-0.2.3...
+Preprocessing library ghc-typelits-knownnat-0.2.3...
+[1 of 3] Compiling GHC.TypeLits.KnownNat.TH ( src/GHC/TypeLits/KnownNat/TH.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/KnownNat/TH.o )
+[2 of 3] Compiling GHC.TypeLits.KnownNat.Solver ( src/GHC/TypeLits/KnownNat/Solver.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/KnownNat/Solver.o )
+[3 of 3] Compiling GHC.TypeLits.KnownNat ( src/GHC/TypeLits/KnownNat.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/KnownNat.o )
+[1 of 3] Compiling GHC.TypeLits.KnownNat.TH ( src/GHC/TypeLits/KnownNat/TH.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/KnownNat/TH.p_o )
+[2 of 3] Compiling GHC.TypeLits.KnownNat.Solver ( src/GHC/TypeLits/KnownNat/Solver.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/KnownNat/Solver.p_o )
+[3 of 3] Compiling GHC.TypeLits.KnownNat ( src/GHC/TypeLits/KnownNat.hs, dist/dist-sandbox-a79a4d0f/build/GHC/TypeLits/KnownNat.p_o )
+Running Haddock for ghc-typelits-knownnat-0.2.3...
+Preprocessing library ghc-typelits-knownnat-0.2.3...
+Haddock coverage:
+ 100% (  2 /  2) in 'GHC.TypeLits.KnownNat.TH'
+ 100% (  2 /  2) in 'GHC.TypeLits.KnownNat.Solver'
+ 100% (  8 /  8) in 'GHC.TypeLits.KnownNat'
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/ghc-typelits-knownnat/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-ghc-typelits-knownnat-0.25241025041760348381.3
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/ghc-typelits-knownnat-0.2.3-8Pv6lNngloiAJcw4kM0Oi4
+Registering ghc-typelits-knownnat-0.2.3...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-40230/ghc-typelits-knownnat-0.2.3'

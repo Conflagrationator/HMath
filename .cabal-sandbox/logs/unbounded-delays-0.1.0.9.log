@@ -1,0 +1,38 @@
+cabal: Entering directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14744/unbounded-delays-0.1.0.9'
+[1 of 1] Compiling Main             ( /var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14744/unbounded-delays-0.1.0.9/dist/dist-sandbox-a79a4d0f/setup/setup.hs, /var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14744/unbounded-delays-0.1.0.9/dist/dist-sandbox-a79a4d0f/setup/Main.o )
+Linking /var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14744/unbounded-delays-0.1.0.9/dist/dist-sandbox-a79a4d0f/setup/setup ...
+Configuring unbounded-delays-0.1.0.9...
+Building unbounded-delays-0.1.0.9...
+Preprocessing library unbounded-delays-0.1.0.9...
+[1 of 2] Compiling Control.Concurrent.Thread.Delay ( Control/Concurrent/Thread/Delay.hs, dist/dist-sandbox-a79a4d0f/build/Control/Concurrent/Thread/Delay.o )
+[2 of 2] Compiling Control.Concurrent.Timeout ( Control/Concurrent/Timeout.hs, dist/dist-sandbox-a79a4d0f/build/Control/Concurrent/Timeout.o )
+[1 of 2] Compiling Control.Concurrent.Thread.Delay ( Control/Concurrent/Thread/Delay.hs, dist/dist-sandbox-a79a4d0f/build/Control/Concurrent/Thread/Delay.p_o )
+[2 of 2] Compiling Control.Concurrent.Timeout ( Control/Concurrent/Timeout.hs, dist/dist-sandbox-a79a4d0f/build/Control/Concurrent/Timeout.p_o )
+Running Haddock for unbounded-delays-0.1.0.9...
+Preprocessing library unbounded-delays-0.1.0.9...
+
+Control/Concurrent/Timeout.hs:45:1: warning: [-Wunused-imports]
+    The import of ‘Data.Int’ is redundant
+      except perhaps to import instances from ‘Data.Int’
+    To import instances alone, use: import Data.Int()
+
+Control/Concurrent/Timeout.hs:46:1: warning: [-Wunused-imports]
+    The import of ‘System.IO’ is redundant
+      except perhaps to import instances from ‘System.IO’
+    To import instances alone, use: import System.IO()
+
+Control/Concurrent/Timeout.hs:47:1: warning: [-Wunused-imports]
+    The qualified import of ‘System.Timeout’ is redundant
+      except perhaps to import instances from ‘System.Timeout’
+    To import instances alone, use: import System.Timeout()
+Haddock coverage:
+ 100% (  2 /  2) in 'Control.Concurrent.Thread.Delay'
+ 100% (  2 /  2) in 'Control.Concurrent.Timeout'
+Documentation created:
+dist/dist-sandbox-a79a4d0f/doc/html/unbounded-delays/index.html
+Creating package registration file:
+/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/pkgConf-unbounded-delays-0.1.0510616708590357944.9
+Installing library in
+/Users/william/Documents/Projects/HMath/.cabal-sandbox/lib/x86_64-osx-ghc-8.0.2/unbounded-delays-0.1.0.9-KUlzXOkbqW5A3Ab3MscyBX
+Registering unbounded-delays-0.1.0.9...
+cabal: Leaving directory '/var/folders/r2/fkb2g5z955n8j3wd2dwnhzt40000gn/T/cabal-tmp-14744/unbounded-delays-0.1.0.9'
