@@ -8,73 +8,133 @@ module Parser.AsciiMath where
 import Structure
 import Unit
 import Value.Number
+import Value.Variable
+import Value.Vector
+import Value.Matrix
+import Constraint.Addable
+import Constraint.Multipliable
+import Constraint.Radicalizable
+import Constraint.VectorSpace
+import Constraint.MeasureSpace
+import Constraint.InnerProductSpace
 
+import Control.Monad (void)
 import Text.Megaparsec
 import Text.Megaparsec.Expr
-import Text.Megaparsec.String -- input stream is of type ‘String’
+import Text.Megaparsec.String
 import qualified Text.Megaparsec.Lexer as L
 
---------------------------------------------------------------------------------
+import Data.Maybe
+import Data.List hiding (group) -- FIXME: temporary - outputs for testing
 
-integer :: Parser Integer
-integer = L.integer
-
-float :: Parser Double
-float = L.float
-
-number :: Parser Number
-number = do
-    n <- try float <|> (fmap fromIntegral integer) <?> "number"
-    return $ Measure n unitless
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{-
 --------------------------------------------------------------------------------
 -- LEXICAL STRUCTURE
 
--- ?
+data Expr = Const String | Unary String Expr | Binary String Expr Expr
+
+instance Show Expr where
+    show (Const s) = s
+    show (Unary s a) = "(" ++ s ++ ":" ++ show a ++ ")"
+    show (Binary s a b) = "(" ++ s ++ ": " ++ show a ++ " " ++ show b ++ ")"
 
 --------------------------------------------------------------------------------
--- LEXER
+-- PRIMITIVES
 
--- | Consumes any space in front
 spaceConsumer :: Parser ()
 spaceConsumer = L.space (void spaceChar) lineComment blockComment
-  where lineComment  = L.skipLineComment "//"
-        blockComment = L.skipBlockComment "/*" "*/"
+  where
+    lineComment = L.skipLineComment "//"
+    blockComment = L.skipBlockComment "/*" "*/"
 
--- | Parses a symbol then consumes any space after
+lexeme :: Parser a -> Parser a
+lexeme = L.lexeme spaceConsumer
+
 symbol :: String -> Parser String
 symbol = L.symbol spaceConsumer
 
 --------------------------------------------------------------------------------
--- EXPRESSION PARSER
+-- ROOT
 
-infixL  name f = InfixL  (f <$ symbol name)
-infixR  name f = InfixR  (f <$ symbol name)
-infixN  name f = InfixN  (f <$ symbol name)
-prefix  name f = Prefix  (f <$ symbol name)
-postfix name f = Postfix (f <$ symbol name)
+parseNumber :: Parser String
+parseNumber = do
+    i <- some digitChar
+    f <- optional (try (char '.') *> some digitChar)
+    return $ if isNothing f then i else i ++ "." ++ fromJust f
 
-operators = [
-    --[infixN "_" Function],
-    --[infixN "^" Function],
-    --[prefix "-" Function],
-    [infixL "+" Function, infixL "-" Function]]
+parseGreek :: Parser String
+parseGreek = choice (map string greekLetters) <?> "greek letter"
+    
+parseIdent :: Parser String -- only single letter identifiers for now
+parseIdent = fmap (\x -> [x]) letterChar
 
-equalities = [
-    ]
--}
+group :: Parser a -> Parser a
+group p = choice (map (\(l, r) -> try (between (symbol l) (symbol r) p)) [("(", ")"), ("[", "]"), ("{", "}"), ("(:", ":)"), ("{:", ":}")])
+
+--------------------------------------------------------------------------------
+-- EXPRESSION
+
+-- | parses a constant
+parseConst :: Parser Expr
+parseConst = lexeme $ fmap Const (parseNumber <|> parseGreek <|> parseIdent)
+
+-- | parses a segment of the expression
+term :: Parser Expr
+term = group parseExpression <|> parseConst <?> "term"
+
+-- | parses operators and segments
+parseExpression :: Parser Expr
+parseExpression = makeExprParser term operatorTable <?> "expression"
+
+operatorTable = [
+    [infixN "_"],
+    [prefix "-"],
+    [infixR "^"],
+    [infixL "*", implicit "*", infixL "/", infixL "-:", infixL "xx"],
+    [infixL "+", infixL "-"]]
+
+prefix  name = Prefix  (Unary  name <$ symbol name)
+infixL  name = InfixL  (Binary name <$ symbol name)
+infixR  name = InfixR  (Binary name <$ symbol name)
+infixN  name = InfixN  (Binary name <$ symbol name)
+postfix name = Postfix (Unary  name <$ symbol name)
+implicit op  = InfixL  (Binary op   <$ symbol "") -- only use once in table
+
+--------------------------------------------------------------------------------
+
+greekLetters = [
+    "alpha",
+    "beta",
+    "chi",
+    "delta",
+    "Delta",
+    "epsilon",
+    "eta",
+    "gamma",
+    "Gamma",
+    "iota",
+    "Kappa",
+    "lambda",
+    "Lambda",
+    "mu",
+    "nu",
+    "omega",
+    "Omega",
+    "phi",
+    "Phi",
+    "pi",
+    "Pi",
+    "psi",
+    "Psi",
+    "rho",
+    "sigma",
+    "Sigma",
+    "tau",
+    "theta",
+    "Theta",
+    "upsilon",
+    "varepsilon",
+    "varphi",
+    "vartheta",
+    "xi",
+    "Xi",
+    "zeta"]
