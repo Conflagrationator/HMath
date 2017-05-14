@@ -17,7 +17,6 @@ import Unit
 
 class (Show e, Show r) => Expression e r | e -> r where
     evaluate :: e -> Guard r
-    -- Either String r, Left is for failure message
 
 ------------------------------------------------------------------------------
 -- | Value
