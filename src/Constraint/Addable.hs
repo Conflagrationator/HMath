@@ -23,7 +23,7 @@ class (Value a, Value b, Value c) => Addable a b c | a b -> c where
 -- | The Operator
 
 data Addition a b c where
-    Addition :: (Expression a n, Expression b m, Addable n m c) => a -> b -> Addition a b c
+    Addition :: (Expression a m, Expression b n, Addable m n c) => a -> b -> Addition a b c
     -- a & b determine n & m which determine c
 
 ------------------------------------------------------------------------------

@@ -14,13 +14,13 @@ Expressions are set up in a tree fashion:
 ```
 (4+5)/3.2*(x-3)
 
-     /
-  ┌──┴───┐
-  +      *
- ┌┴┐    ┌┴──┐
- 4 5   3.2  -
-           ┌┴┐
-           x 3
+         *
+     ┌───┴──┐
+     /      -
+  ┌──┴─┐   ┌┴┐
+  +   3.2  x 3
+ ┌┴┐
+ 4 5
 ```
 
 All Types in the tree (all types that are involved in calculations) are members of the class `Expression`. The Function of `Expression`s is simply to evaluate everything below them (recursively). This is done via the `evaluate` function.

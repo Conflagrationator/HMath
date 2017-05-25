@@ -1,9 +1,16 @@
 -- PARSING AsciiMath
 --------------------------------------------------------------------------------
 
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE GADTs #-}
+
+{-# LANGUAGE EmptyDataDecls,
+             MultiParamTypeClasses,
+             ScopedTypeVariables,
+             FunctionalDependencies,
+             FlexibleInstances,
+             UndecidableInstances,
+             TypeFamilies #-}
+-- OverlappingInstances,
 
 module Parser.AsciiMath where
 
@@ -31,6 +38,9 @@ import qualified Text.Megaparsec.Lexer as L
 import Data.Maybe
 import Data.List -- FIXME: temporary - outputs for testing
 import Text.Read (readMaybe)
+
+import Data.Typeable
+import Data.Dynamic
 
 --------------------------------------------------------------------------------
 -- PARSER
@@ -120,7 +130,7 @@ operatorTable = [
     [infixL ","],
     [prefix "-"],
     [infixR "^"],
-    [infixL "*", implicit "*", infixL "/", infixL "-:", infixL "xx"],
+    [infixL "*", infixL "/", infixL "-:", infixL "xx", implicit "*"],
     [infixL "+", infixL "-"]]
 
 prefix  name = Prefix  (Unary  name <$ symbol name)
@@ -128,7 +138,7 @@ infixL  name = InfixL  (Binary name <$ symbol name)
 infixR  name = InfixR  (Binary name <$ symbol name)
 infixN  name = InfixN  (Binary name <$ symbol name)
 postfix name = Postfix (Unary  name <$ symbol name)
-implicit op  = InfixL  (Binary op   <$ symbol "") -- only use once in table
+implicit op  = InfixL  (Binary op   <$ symbol "") -- only use once in table & must always be last in list (since it matches an empty string (which always succeeds))
 
 --------------------------------------------------------------------------------
 
@@ -179,72 +189,97 @@ functionNames = [
 --------------------------------------------------------------------------------
 -- translates parsed expression tree to actual expression structure
 
--- TODO: make something that translates the tree
--- FIXME: the issue is to make a function that takes an Expr and returns 
---        Maybe(Expression) of any kind of Expression. the type of the Expression
---        cannot be known at compile time
--- TODO: maybe making a wrapper type that encapsulates an expression, then
---       unwrapping it and potentially failing when putting it in a container
---       expression, then finally returning on the outermost layer a wrapper,
---       knowing that ther is some valid expression inside, just not knowing the type of it.
-
--- NOTE: 1st attempt
-
 --------------------------------------------------------------------------------
 -- WRAPPER TYPE
 
-data ExpressionWrapper = forall e r. Expression e r => WrappedExpression e
-
-instance Show ExpressionWrapper where
-    show (WrappedExpression e) = show e
-
-wrapExpression :: Expression e r => e -> ExpressionWrapper
-wrapExpression = WrappedExpression
+data ExpressionWrapper where
+    WrappedExpression :: (Expression e r) => e -> ExpressionWrapper
 
 --------------------------------------------------------------------------------
 -- TRANSLATOR
 
 translateExpression :: Expr -> Maybe ExpressionWrapper
 translateExpression (Const s)
-    | isJust (translateNumber s) = fmap wrapExpression (translateNumber s)
-    | isJust (translateGreek s) = fmap wrapExpression (translateGreek s)
-    | isJust (translateIdent s) = fmap wrapExpression (translateIdent s)
+    | isJust (readMaybe s :: Maybe Double) = Just (WrappedExpression (Measure (fromJust (readMaybe s :: Maybe Double)) unitless)) -- FIXME: find out a way to read units
+    | s `elem` greekLetters = Just (WrappedExpression (Variable s))
+    | length s == 1 = Just (WrappedExpression (Variable s))
     | otherwise = Nothing
--- translateExpression (Group s a)
--- translateExpression (Unary name a)
--- translateExpression (Binary name a b)
---     | name == "+" = fmap wrapExpression (translateAddition (translateExpression a) (translateExpression b))
---     -- TODO: find out where to put checking for name string equality (for use with more complicated ones like log and ln, etc.)
---     | otherwise = Nothing
--- translateExpression (Func name sub sup args)
+translateExpression (Group s a) = undefined
+translateExpression (Unary name a) = undefined
+translateExpression (Binary name a b)
+    | name == "+" = translateAddition (translateExpression a) (translateExpression b)
+    | otherwise = Nothing
+translateExpression (Func name sub sup args) = undefined
 
 --------------------------------------------------------------------------------
 -- SPECIFIC TRANSLATORS
 
-translateNumber :: String -> Maybe Number
-translateNumber s = if isJust (readMaybe s :: Maybe Double) then Just (Measure (fromJust (readMaybe s :: Maybe Double)) unitless) else Nothing -- FIXME: find out a way to read units
+translateAddition :: Maybe ExpressionWrapper -> Maybe ExpressionWrapper -> Maybe ExpressionWrapper
+translateAddition (Just (WrappedExpression a)) (Just (WrappedExpression b)) = undefined
+translateAddition _ _ = Nothing
 
-translateGreek :: String -> Maybe Variable
-translateGreek s = if s `elem` greekLetters then Just (Variable s) else Nothing
 
-translateIdent :: String -> Maybe Variable
-translateIdent s = if length s == 1 then Just (Variable s) else Nothing -- TODO: add support for checking if they're defined already. or should that go in the parser?
 
--- translateAddition :: (Expression a n, Expression b m, Addable n m c) => String -> Maybe ExpressionWrapper -> Maybe ExpressionWrapper -> Maybe (Addition a b c)
--- translateAddition s e1 e2 -- if e1 is type a & e2 is type b where they are also addable to c
---     | s == "+" && isJust e1 && isJust e1 = undefined
---     | otherwise = Nothing
+-- !!!! BEGIN GENERALIZED `constructAddition` FUNCTION !!!!
+
+class AreAddable a b c where
+    constructAddition :: a -> b -> Maybe (Addition a b c)
+    
+data HTrue
+data HFalse
+
+class AreAddable' flag a b c where
+    constructAddition' :: flag -> a -> b -> Maybe (Addition a b c)
+
+instance (AreAddablePred flag a b c, AreAddable' flag a b c) => AreAddable a b c where
+    constructAddition = constructAddition' (undefined :: flag)
+
+
+
+
+class AreAddablePred flag a b c | a b -> flag, a b -> c where {}
+
+-- instance {-# OVERLAPPABLE #-} TypeCast flag HFalse => AreAddablePred flag a b c
+instance {-# OVERLAPPABLE #-} (flag ~ HFalse) => AreAddablePred flag a b Number -- FIXME: Number should not be here, it's a throwaway type
+
+instance AreAddablePred HTrue Number Number Number
+
+-- type family AreAddablePred a b where
+--     AreAddablePred Number Number = HTrue
+
+
+instance {-# OVERLAPPABLE #-} (Expression a m, Expression b n, Addable m n c) => AreAddable' HTrue a b c where
+    constructAddition' _ a b = Just (Addition a b)
+instance {-# OVERLAPPABLE #-} AreAddable' HFalse a b c where
+    constructAddition' _ a b = Nothing
+
+
+
+
+class TypeCast   a b   | a -> b, b->a   where typeCast   :: a -> b
+class TypeCast'  t a b | t a -> b, t b -> a where typeCast'  :: t->a->b
+class TypeCast'' t a b | t a -> b, t b -> a where typeCast'' :: t->a->b
+instance TypeCast'  () a b => TypeCast a b where typeCast x = typeCast' () x
+instance TypeCast'' t a b => TypeCast' t a b where typeCast' = typeCast''
+instance TypeCast'' () a a where typeCast'' _ x  = x
+
+
+
+-- TESTING
+a = Measure 5 unitless
+b = Measure 6 unitless
+c = Variable "s"
+-- d = Vector (a :> b :> Nil)
+
+
+
 
 --------------------------------------------------------------------------------
 -- WRITER
 --------------------------------------------------------------------------------
 -- takes an actual expression tree and outputs AsciiMath
 
-class AsciiMathDisplayable e where
-    displayAsciiMath :: e -> String
-
-instance AsciiMathDisplayable Number where
-    displayAsciiMath (Measure a u) = show a ++ if u == unitless then "" else "text(" ++ show u ++ ")"
-    -- FIXME: this doesn't actually deal with the real problem
-    -- TODO: need to make it extendable so anyone can write a new writing method for all
-    --       expression instances
+-- class (Expression e r) => AsciiMathDisplayable e where
+--     -- TODO: use solution here: https://wiki.haskell.org/GHC/AdvancedOverlap
+--     -- to implement testing of whether the expression implements this and can
+--     -- be displayed or just try to show it's default show value (or something)
