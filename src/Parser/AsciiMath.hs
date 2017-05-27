@@ -39,9 +39,6 @@ import Data.Maybe
 import Data.List -- FIXME: temporary - outputs for testing
 import Text.Read (readMaybe)
 
-import Data.Typeable
-import Data.Dynamic
-
 --------------------------------------------------------------------------------
 -- PARSER
 --------------------------------------------------------------------------------
@@ -195,6 +192,9 @@ functionNames = [
 data ExpressionWrapper where
     WrappedExpression :: (Expression e r) => e -> ExpressionWrapper
 
+instance Show ExpressionWrapper where
+    show (WrappedExpression e) = show e
+
 --------------------------------------------------------------------------------
 -- TRANSLATOR
 
@@ -215,64 +215,42 @@ translateExpression (Func name sub sup args) = undefined
 -- SPECIFIC TRANSLATORS
 
 translateAddition :: Maybe ExpressionWrapper -> Maybe ExpressionWrapper -> Maybe ExpressionWrapper
-translateAddition (Just (WrappedExpression a)) (Just (WrappedExpression b)) = undefined
+translateAddition (Just (WrappedExpression a)) (Just (WrappedExpression b)) = constructAddition a b
 translateAddition _ _ = Nothing
 
 
 
 -- !!!! BEGIN GENERALIZED `constructAddition` FUNCTION !!!!
 
-class AreAddable a b c where
-    constructAddition :: a -> b -> Maybe (Addition a b c)
+class AreAddable a b where
+    constructAddition :: a -> b -> Maybe ExpressionWrapper
     
 data HTrue
 data HFalse
 
-class AreAddable' flag a b c where
-    constructAddition' :: flag -> a -> b -> Maybe (Addition a b c)
+class AreAddable' flag a b where
+    constructAddition' :: flag -> a -> b -> Maybe ExpressionWrapper
 
-instance (AreAddablePred flag a b c, AreAddable' flag a b c) => AreAddable a b c where
+instance (AreAddablePred flag a b, AreAddable' flag a b) => AreAddable a b where
     constructAddition = constructAddition' (undefined :: flag)
 
 
 
 
-class AreAddablePred flag a b c | a b -> flag, a b -> c where {}
+class AreAddablePred flag a b | a b -> flag where {}
 
--- instance {-# OVERLAPPABLE #-} TypeCast flag HFalse => AreAddablePred flag a b c
-instance {-# OVERLAPPABLE #-} (flag ~ HFalse) => AreAddablePred flag a b Number -- FIXME: Number should not be here, it's a throwaway type
+instance {-# OVERLAPPABLE #-} (flag ~ HFalse) => AreAddablePred flag a b -- FIXME: Number should not be here, it's a throwaway type
 
-instance AreAddablePred HTrue Number Number Number
+instance {-# OVERLAPPABLE #-} AreAddablePred HTrue Number Number
 
 -- type family AreAddablePred a b where
 --     AreAddablePred Number Number = HTrue
 
 
-instance {-# OVERLAPPABLE #-} (Expression a m, Expression b n, Addable m n c) => AreAddable' HTrue a b c where
-    constructAddition' _ a b = Just (Addition a b)
-instance {-# OVERLAPPABLE #-} AreAddable' HFalse a b c where
+instance {-# OVERLAPPABLE #-} (Expression a m, Expression b n, Addable m n c) => AreAddable' HTrue a b where
+    constructAddition' _ a b = Just (WrappedExpression (Addition a b))
+instance {-# OVERLAPPABLE #-} AreAddable' HFalse a b where
     constructAddition' _ a b = Nothing
-
-
-
-
-class TypeCast   a b   | a -> b, b->a   where typeCast   :: a -> b
-class TypeCast'  t a b | t a -> b, t b -> a where typeCast'  :: t->a->b
-class TypeCast'' t a b | t a -> b, t b -> a where typeCast'' :: t->a->b
-instance TypeCast'  () a b => TypeCast a b where typeCast x = typeCast' () x
-instance TypeCast'' t a b => TypeCast' t a b where typeCast' = typeCast''
-instance TypeCast'' () a a where typeCast'' _ x  = x
-
-
-
--- TESTING
-a = Measure 5 unitless
-b = Measure 6 unitless
-c = Variable "s"
--- d = Vector (a :> b :> Nil)
-
-
-
 
 --------------------------------------------------------------------------------
 -- WRITER

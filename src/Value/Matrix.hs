@@ -1,5 +1,5 @@
 -- | Matrices
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -9,7 +9,7 @@
 
 module Value.Matrix where
 
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 import Structure
 import Value.Number
@@ -23,13 +23,13 @@ import CLaSH.Sized.Vector as V
 import Prelude as P
 import Data.List
 
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- | Matrix data type
 
 data Matrix (m :: Nat) (n :: Nat) r where
     Matrix :: (Expression e r, VectorSpace r) => Vec m (Vec n e) -> Matrix m n r
 
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- ALL MATRICES ARE VALUES
 -- ALL VALUES ARE EXPRESSIONS THAT EVALUATE TO THEMSELVES
 
@@ -43,7 +43,7 @@ instance Value (Matrix m n r)
 instance Show (Matrix m n r) where
     show (Matrix rows) = "[" P.++ (intercalate ", " (P.map (\col -> "[" P.++ (intercalate ", " (P.map show (toList col))) P.++ "]") (toList rows))) P.++ "]"
 
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- CONSTRAINT & OPERATOR IMPLEMENTATION
 
 -- | Matrix Addition
